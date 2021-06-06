@@ -5,14 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.last_capston.Code;
-import com.example.last_capston.MessageItem;
+import com.example.last_capston.data.Code;
+import com.example.last_capston.data.MessageItem;
 import com.example.last_capston.R;
-
 import java.util.ArrayList;
 
 public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -31,13 +28,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if(viewType == Code.ViewType.CENTER_CONTENT){
-            view = inflater.inflate(R.layout.room_center_item,parent,false);
+            view = inflater.inflate(R.layout.room_center_item, parent,false);
             return new CenterViewHolder(view);
         }else if(viewType == Code.ViewType.LEFT_CONTENT){
-            view = inflater.inflate(R.layout.room_left_item,parent,false);
+            view = inflater.inflate(R.layout.room_left_item, parent,false);
             return new LeftViewHolder(view);
         }else{
-            view = inflater.inflate(R.layout.room_right_item,parent,false);
+            view = inflater.inflate(R.layout.room_right_item, parent,false);
             return new RightViewHolder(view);
         }
 

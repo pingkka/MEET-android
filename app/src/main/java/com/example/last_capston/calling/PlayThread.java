@@ -35,20 +35,20 @@ public class PlayThread extends Thread {
     public void run() {
         super.run();
 
-        audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, sampleRate, channelCount, audioFormat, bufferSize, AudioTrack.MODE_STREAM); // streaming mode => blocking 함수
+        //audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, sampleRate, channelCount, audioFormat, bufferSize, AudioTrack.MODE_STREAM); // streaming mode => blocking 함수
 
-//        audioTrack = new AudioTrack.Builder()
-//                .setAudioAttributes(new AudioAttributes.Builder()
-//                        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-//                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-//                        .build())
-//                .setAudioFormat(new AudioFormat.Builder()
-//                        .setEncoding(audioFormat)
-//                        .setSampleRate(sampleRate)
-//                        .setChannelMask(channelCount)
-//                        .build())
-//                .setBufferSizeInBytes(bufferSize)
-//                .build();
+        audioTrack = new AudioTrack.Builder()
+                .setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build())
+                .setAudioFormat(new AudioFormat.Builder()
+                        .setEncoding(audioFormat)
+                        .setSampleRate(sampleRate)
+                        .setChannelMask(channelCount)
+                        .build())
+                .setBufferSizeInBytes(bufferSize)
+                .build();
 
 
         audioTrack.play();

@@ -1,4 +1,4 @@
-package com.example.last_capston.main;
+package com.example.last_capston.data;
 
 import lombok.Getter;
 import lombok.Setter;

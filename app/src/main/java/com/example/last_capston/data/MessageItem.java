@@ -1,5 +1,8 @@
-package com.example.last_capston;
+package com.example.last_capston.data;
 
+import lombok.Getter;
+
+@Getter
 public class MessageItem {
     //내용
     private String content;
@@ -13,9 +16,5 @@ public class MessageItem {
         this.viewType = viewType;
         this.name = name;
     }
-
-    public String getContent(){ return content;}
-    public String getName(){ return name;}
-    public int getViewType(){ return viewType;}
 
 }

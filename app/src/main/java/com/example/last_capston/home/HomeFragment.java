@@ -1,4 +1,4 @@
-package com.example.last_capston.view;
+package com.example.last_capston.home;
 
 
 import android.os.Build;
@@ -34,6 +34,8 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
+        permissionCheck();
+
 
 
         binding.createRoomBTN.setOnClickListener(v -> {
@@ -45,10 +47,6 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(binding.getRoot())
                     .navigate(R.id.action_homeFragment_to_enterRoomFragment);
         });
-
-        permissionCheck();
-
-
 
         return binding.getRoot();
     }

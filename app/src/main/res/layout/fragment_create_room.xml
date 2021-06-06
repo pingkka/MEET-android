@@ -40,7 +40,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="MEET"
-            android:textSize="80sp" />
+            android:textSize="80dp" />
 
     </LinearLayout>
 
@@ -53,10 +53,11 @@
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="32dp"
             android:text="방 이름"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -68,6 +69,7 @@
             android:layout_marginEnd="24dp"
             android:ems="10"
             android:inputType="textPersonName"
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -80,6 +82,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
             android:text="방 비밀번호"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inputRoomID" />
 
@@ -91,6 +94,7 @@
             android:layout_marginEnd="24dp"
             android:ems="10"
             android:inputType="textPersonName"
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -103,6 +107,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
             android:text="사용자 이름"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inputRoomPW" />
 
@@ -114,6 +119,7 @@
             android:layout_marginEnd="24dp"
             android:ems="10"
             android:inputType="textPersonName"
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
@@ -122,20 +128,23 @@
             android:id="@+id/createBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="32dp"
             android:text="방 만들기"
+            android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ereateExit" />
+            app:layout_constraintEnd_toStartOf="@+id/ereateExit"
+            app:layout_constraintTop_toBottomOf="@+id/inputUserID" />
 
         <Button
             android:id="@+id/ereateExit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="32dp"
             android:text="취소"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="14dp"
+            app:layout_constraintBottom_toBottomOf="@+id/createBTN"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

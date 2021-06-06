@@ -54,10 +54,11 @@
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="32dp"
             android:text="방 이름"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -79,6 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="방 비밀번호"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="@+id/textView4"
             app:layout_constraintTop_toBottomOf="@+id/enterRoomID" />
 
@@ -100,6 +102,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="사용자 이름"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="@+id/enterRoomPW"
             app:layout_constraintTop_toBottomOf="@+id/enterRoomPW" />
 
@@ -119,21 +122,23 @@
             android:id="@+id/enterOK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="32dp"
-            android:background="#000000"
             android:text="방 입장하기"
+            android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/enterExit" />
+            app:layout_constraintEnd_toStartOf="@+id/enterExit"
+            app:layout_constraintTop_toBottomOf="@+id/enterUserID" />
 
         <Button
             android:id="@+id/enterExit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="32dp"
             android:text="취소"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="14dp"
+            app:layout_constraintBottom_toBottomOf="@+id/enterOK"
             app:layout_constraintEnd_toEndOf="parent" />
 
 

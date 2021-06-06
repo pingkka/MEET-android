@@ -1,10 +1,14 @@
 package com.example.last_capston.main;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import com.example.last_capston.calling.CallingViewModel;
 import com.example.last_capston.calling.PlayThread;
+import com.example.last_capston.data.MQTTSettingData;
+import com.example.last_capston.data.SendText;
+import com.example.last_capston.data.UserItem;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -40,25 +44,28 @@ public class MQTTClient implements MqttCallbackExtended {
     private String topic;
     private String topic_audio;
     private String topic_login;
+    private String topic_login_audio;
     private String topic_notifyUSer;
     private String topic_logout;
+    private String topic_text;
+    private String topic_emotion;
+
     private String userName;
 
-    private static CallingViewModel callingViewModel;
-
+    public CallingViewModel callingViewModel;
+    private MainViewModel mainViewModel;
 
     //정리해야 할 변수
     public ArrayList<String> participantsList = new ArrayList<>(100);
-
     private List<PlayThread> playThreadList = new ArrayList<>(100);
 
 
 
-    private MainViewModel mainViewModel;
+
     private String recvMsg;
     private String beforeLoginUser = "";
     private String beforeLogoutUser = "";
-
+    private Context context;
 
     public static MQTTClient getInstance() {
         if(instance == null) {
@@ -68,7 +75,7 @@ public class MQTTClient implements MqttCallbackExtended {
     }
 
 
-    public void init(String topic, String userName, String ip, String port, CallingViewModel callingViewModel, MainViewModel mainViewModel) {
+    public void init(String topic, String userName, String ip, String port, MainViewModel mainViewModel) {
         connect(ip, port, topic, userName);
 
         this.topic = topic;
@@ -79,9 +86,12 @@ public class MQTTClient implements MqttCallbackExtended {
 
         topic_audio = topic + "/audio";
         topic_login = topic + "/login";
+        topic_login_audio = topic + "/loginAudio";
         topic_notifyUSer = topic + "/login/notifyUser";
         topic_logout = topic + "/logout";
-        this.callingViewModel = callingViewModel;
+        topic_text = topic + "/text";
+        topic_emotion = topic + "/emotion";
+
         this.mainViewModel = mainViewModel;
     }
 
@@ -132,17 +142,18 @@ public class MQTTClient implements MqttCallbackExtended {
     public void subscribeAll() {
         subscribe(topic);
         subscribe(topic_audio);
+        subscribe(topic_login_audio);
         subscribe(topic_login);
         subscribe(topic_notifyUSer);
         subscribe(topic_logout);
+        subscribe(topic_text);
+        subscribe(topic_emotion);
     }
 
     public void publish(String topic, String msg) {
-
         try {
             client.publish(topic, new MqttMessage(msg.getBytes()));
-
-            Log.i("MQTT", "PUB " + topic + recvMsg);
+            Log.i("MQTT", "PUB :" + topic + msg);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -151,7 +162,7 @@ public class MQTTClient implements MqttCallbackExtended {
     public void publish(String topic, byte[] payload) {
         try {
             client.publish(topic, new MqttMessage(payload));
-            Log.i("MQTT", "PUB " + topic);
+            Log.i("MQTT", "PUB :" + topic);
         } catch (MqttException e) {
             e.printStackTrace();
             if(callingViewModel.getRecordThread().isAlive()) {
@@ -175,44 +186,52 @@ public class MQTTClient implements MqttCallbackExtended {
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         recvMsg = new String(message.getPayload(), "UTF-8");
-        Log.d("Message arrived : ", "topic:" + topic + recvMsg);
+        Log.i("MQTT", "messageArrived " + topic);
         /* /roomID/login */
         if (topic.equals(topic_login)) {
             String name = new String(message.getPayload(), "UTF-8");
-            Log.i("MQTT", "userList add " + name);
+
+            //가끔 mqtt를 여러번 인식하는 오류가 있어서 두번 인식하지 못하게 하는 코드
             if (!beforeLoginUser.equals(name)) {
-                setParticipantsList(recvMsg);
-                mainViewModel.setLoginUser(recvMsg);
-                beforeLoginUser = recvMsg;
-                publish(topic_notifyUSer, userName);
+                UserItem newUser = new UserItem(name);
+                setParticipantsList(newUser);
 
-                PlayThread playThread = new PlayThread();
-                playThread.setUserName(name);
-
-//                if(callingViewModel.getPlayFlag())
-//                    playThread.setPlayFlag(true);
-//                playThread.start();
-//
-//                playThreadList.add(playThread);
-//                Log.i("MQTT", "playThreadList add " + name);
+                //로그인 topic을 받으면 저장
+                mainViewModel.setLoginUser(name);
+                beforeLoginUser = name;
             }
+        }
+
+        if(topic.equals(topic_login_audio)) {
+            String name = new String(message.getPayload(), "UTF-8");
+
+            PlayThread playThread = new PlayThread();
+            playThread.setUserName(name);
+            if(callingViewModel.getPlayFlag())
+                playThread.setPlayFlag(true);
+            playThread.start();
+
+            playThreadList.add(playThread);
+            Log.i("MQTT", "playThreadList add " + name);
+            publish(topic_notifyUSer, userName);
         }
 
 
         /* /roomID/notifyUser */
         if (topic.equals(topic_notifyUSer)) {
             String name = new String(message.getPayload(), "UTF-8");
-            setParticipantsList(name);
-            Log.i("MQTT", "userList add " + name);
+
+            UserItem newUser = new UserItem(name);
+            setParticipantsList(newUser);
 
             PlayThread playThread = new PlayThread();
             playThread.setUserName(name);
-//            if(callingViewModel.getPlayFlag())
-//                playThread.setPlayFlag(true);
-//            playThread.start();
-//
-//            playThreadList.add(playThread);
-//            Log.i("MQTT", "playThreadList add " + name); // 나오지 않음
+            if(callingViewModel.getPlayFlag())
+                playThread.setPlayFlag(true);
+            playThread.start();
+
+            playThreadList.add(playThread);
+            Log.i("MQTT", "playThreadList add " + name); // 나오지 않음
         }
 
         /* /roomID/audio */
@@ -224,108 +243,109 @@ public class MQTTClient implements MqttCallbackExtended {
 
             if (sender.equals(userName)) return;
             byte[] audioData = Arrays.copyOfRange(messageData, nameData.length, messageData.length);
-//            for (PlayThread playThread: playThreadList) {
-//                if (playThread.getUserName().equals(sender)) {
-//                    if (playThread.getAudioQueue().size() >= 5) {
-//                        playThread.getAudioQueue().clear();
-//                    }
-//                    playThread.getAudioQueue().add(audioData);
-//                    break;
-//                }
-//            }
+            for (PlayThread playThread: playThreadList) {
+                if (playThread.getUserName().equals(sender)) {
+                    if (playThread.getAudioQueue().size() >= 5) {
+                        playThread.getAudioQueue().clear();
+                    }
+                    playThread.getAudioQueue().add(audioData);
+                    break;
+                }
+            }
+        }
+
+        /* roomID/text */
+        if(topic.equals(topic_text)) {
+            String text = new String(message.getPayload(), "UTF-8");
+            int idx = text.indexOf("&");
+            String sendTextUser = text.substring(0, idx);
+            String sendtext = text.substring(idx + 1);
+            Log.i("MQTT", "sendTextUser = " + sendTextUser);
+            Log.i("MQTT", "sendtext = " + sendtext);
+            SendText sendText = new SendText(sendTextUser, sendtext);
+            mainViewModel.setCurrentText(sendText);
+            Log.i("MQTT", "text = " + text);
+
+        }
+
+        /* roomID/emotion */
+        if(topic.equals(topic_emotion)) {
+            String emotion = new String(message.getPayload(), "UTF-8");
+            Log.i("MQTT", "emotion = " + emotion);
         }
 
         /* roomID/logout */
         if(topic.equals(topic_logout)){
-            if(!beforeLogoutUser.equals(recvMsg)) {
-                mainViewModel.setLogoutUser(recvMsg);
-                beforeLogoutUser = recvMsg;
-            }
-            //참여인원들에게 나갔다고 알리기
-            deleteParticipant(recvMsg);
-        }
-
-        if(topic.equals(topic_logout)) {
             String name = new String(message.getPayload(), "UTF-8");
-            if(!beforeLogoutUser.equals(name)) {
-                mainViewModel.setLogoutUser(name);
-                beforeLogoutUser = name;
-                Log.i("MQTT", "userList remove " + name);
+
+
+            for(int i=0; i<participantsList.size(); i++) {
+                if(participantsList.get(i).equals(name)) {
+                    if(!beforeLogoutUser.equals(name)) {
+                        mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
+                        beforeLogoutUser = name;
+                        Log.i("MQTT", "userList remove " + name);
+                    }
+                    //참여인원들에게 나갔다고 알리기
+                    UserItem newUser = new UserItem(name);
+                    deleteParticipant(newUser);
+                    break;
+                }
             }
-            //참여인원들에게 나갔다고 알리기
-            deleteParticipant(recvMsg);
 
-
-            if(!userName.equals(name)  ) {
-
-//                for(int i=0; i<participantsList.size(); i++) {
-//                    if(participantsList.get(i).equals(name)) {
-//                        participantsList.remove(i);
-//                        mainViewModel.deleteUsersList(name);
-//                        Log.i("MQTT", "userList remove " + name);
-//                        break;
-//                    }
-//                }
-
-//                for(int i=0; i<playThreadList.size(); i++) {
-//                    if(playThreadList.get(i).getUserName().equals(name)) {
-//                        playThreadList.get(i).setPlayFlag(false);
-//                        playThreadList.get(i).getAudioQueue().clear();
-//                        playThreadList.get(i).stopPlaying();
-//                        playThreadList.get(i).interrupt();
-//                        Log.i("MQTT", "before playThreadList remove " + name + "size(" + playThreadList.size() + ")");
-//                        playThreadList.remove(i);
-//                        Log.i("MQTT", "after playThreadList remove " + name + "size(" + playThreadList.size() + ")");
-//                    }
-//                }
+            for(int i=0; i<playThreadList.size(); i++) {
+                if(playThreadList.get(i).getUserName().equals(name)) {
+                    playThreadList.get(i).setPlayFlag(false);
+                    playThreadList.get(i).getAudioQueue().clear();
+                    playThreadList.get(i).stopPlaying();
+                    playThreadList.get(i).interrupt();
+                    Log.i("MQTT", "before playThreadList remove " + name + "size(" + playThreadList.size() + ")");
+                    playThreadList.remove(i);
+                    Log.i("MQTT", "after playThreadList remove " + name + "size(" + playThreadList.size() + ")");
+                }
             }
         }
+
+
+
+
+
+
 
         /* Other Topic */
-
-//        if (topic.equals(topic_login)) {
-//            if(!beforeLoginUser.equals(recvMsg)) {
-//                setParticipantsList(recvMsg);
-//                mainViewModel.setLoginUser(recvMsg);
-//                beforeLoginUser = recvMsg;
-//                publish(topic + "/notifyUser", userName);
-//            }
-//        }else if (topic.equals(topic_notifyUSer)) {
-//            setParticipantsList(recvMsg);
-//        }else if(topic.equals(topic_logout)){
-//            if(!beforeLogoutUser.equals(recvMsg)) {
-//                mainViewModel.setLogoutUser(recvMsg);
-//                beforeLogoutUser = recvMsg;
-//            }
-//            //참여인원들에게 나갔다고 알리기
-//            deleteParticipant(recvMsg);
-//        }
     }
 
 
-    public void setParticipantsList( String user) throws Exception {
-        if(participantsList.contains(user)){
-        }
-        else {
-            participantsList.add(user);
-            mainViewModel.setUserList(user);
+    //participantsList
+    public void setParticipantsList( UserItem user) throws Exception {
+
+        if(!participantsList.contains(user.userName)){
+
+            mainViewModel.addUserItem(user);
+            participantsList.add(user.userName);
+            Log.i("MQTT", "userList add " + user);
+
+
         }
     }
 
 
-    public void deleteParticipant(String user) throws Exception {
-        participantsList.remove(user);
-        mainViewModel.deleteUsersList(user);
+    public void deleteParticipant(UserItem user) throws Exception {
+        participantsList.remove(user.userName);
+        mainViewModel.deleteUsersItem(user.userName);
     }
 
-
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
 
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        Log.d("Message with ", token + " delivered.");
+
     }
+
     private boolean containsUserList(String name) {
         for (String user : participantsList) {
             if (user.equals(name)) {

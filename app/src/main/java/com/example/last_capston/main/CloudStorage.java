@@ -1,15 +1,11 @@
-package com.example.last_capston;
+package com.example.last_capston.main;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 
-import com.example.last_capston.calling.CallingViewModel;
-import com.example.last_capston.main.MQTTClient;
-import com.example.last_capston.main.MQTTSettingData;
-import com.example.last_capston.main.MainViewModel;
+import com.example.last_capston.data.MQTTSettingData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,7 +29,6 @@ public class CloudStorage {
     private MQTTSettingData settingData = MQTTSettingData.getInstance();
     private Context context;
     private static MainViewModel viewModel = MainViewModel.getInstance();
-    private static CallingViewModel callingViewModel;
 
     public CloudStorage(Context context, MainViewModel viewModel) {
         this.context = context;
@@ -46,7 +41,8 @@ public class CloudStorage {
         if (!checkLogin(roomID, roomPW, user)) {
             return;
         }
-        //
+
+        //firebase에서 동일한 이름의 roomID가 있으면 토스트메세지로 알려주고 없으면 생성해주는 코드
         DocumentReference docRef = db.collection("rooms").document(roomID);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -54,7 +50,7 @@ public class CloudStorage {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Toast.makeText(context, "이미 있음 ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "이미 동일한 이름의 방이 있습니다. ", Toast.LENGTH_SHORT).show();
                     } else {
                         //같은 이름의 방이 없으면 방 생성
                         storeDB(roomID, roomPW, user);
@@ -66,6 +62,7 @@ public class CloudStorage {
         });
     }
 
+    //firebase에 방정보 및 참여자 저장
     private void storeDB(String roomID, String roomPW, String participant) {
 
         CollectionReference rooms = db.collection("rooms");
@@ -74,17 +71,14 @@ public class CloudStorage {
         user.put("roomPW", roomPW);
         user.put("participants", Arrays.asList(participant));
         rooms.document(roomID).set(user);
-        Toast.makeText(context, "방 생성", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "방을 생성했습니다.", Toast.LENGTH_SHORT).show();
 
         //mqtt sub
-        client.init(settingData.getTopic(), settingData.getUserName(), settingData.getIp(), settingData.getPort(), callingViewModel, viewModel);
+        client.init(settingData.getTopic(), settingData.getUserName(), settingData.getIp(), settingData.getPort(),  viewModel);
         client.subscribeAll();
-        try {
-            client.setParticipantsList(settingData.getUserName());
+        viewModel.setEnterFlag(true);
+        client.publish(settingData.getTopic() + "/login", settingData.getUserName());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     //EnterRoomFragment 에서 사용
@@ -113,11 +107,12 @@ public class CloudStorage {
                         Ref.update("participants", FieldValue.arrayUnion(user));
                         try {
                             //mqtt sub
-                            client.init(settingData.getTopic(), settingData.getUserName(), settingData.getIp(), settingData.getPort(), callingViewModel,viewModel);
+                            client.init(settingData.getTopic(), settingData.getUserName(), settingData.getIp(), settingData.getPort(), viewModel);
                             client.subscribeAll();
+                            viewModel.setEnterFlag(true);
                             client.publish(settingData.getTopic() + "/login", settingData.getUserName());
 
-                            viewModel.setEnterFlag(true);
+
 
 
                         } catch (Exception e) {
@@ -135,6 +130,7 @@ public class CloudStorage {
 
     }
 
+    //로그인시 빈칸 검사 함수
     public boolean checkLogin(String roomID, String roomPW, String user) {
         if (roomID.equals("")) {
             Toast.makeText(context, "roomID를 작성해주세요. ", Toast.LENGTH_SHORT).show();
@@ -195,8 +191,8 @@ public class CloudStorage {
                     viewModel.userInit();
 
                     /* MQTTClient 연결 해제 */
-                    client.disconnect();
                     client.getParticipantsList().clear();
+                    client.disconnect();
                     client.getConnectOptions().setAutomaticReconnect(false);
 
 

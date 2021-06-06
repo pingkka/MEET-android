@@ -3,9 +3,16 @@ package com.example.last_capston.main;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.last_capston.data.MQTTSettingData;
+import com.example.last_capston.data.SendText;
+import com.example.last_capston.data.UserItem;
+
 import java.util.ArrayList;
 
 import lombok.Getter;
+
+import static android.media.CamcorderProfile.get;
+
 
 @Getter
 public class MainViewModel extends ViewModel {
@@ -13,27 +20,23 @@ public class MainViewModel extends ViewModel {
     private static MainViewModel instance = new MainViewModel();
     /* MQTT 관련 변수 */
     private MQTTSettingData settingData = MQTTSettingData.getInstance();
-
     private MutableLiveData<String> ip = new MutableLiveData<>();
     private MutableLiveData<String> port = new MutableLiveData<>();
     private MutableLiveData<String> topic = new MutableLiveData<>();
     private MutableLiveData<String> userName = new MutableLiveData<>();
 
-
-    public ArrayList<String> userList = new ArrayList<String>();
-    public MutableLiveData<ArrayList<String>> userListLivedata = new MutableLiveData<ArrayList<String>>();
-
-
+    public MutableLiveData<ArrayList<UserItem>> userListData = new MutableLiveData<ArrayList<UserItem>>();
+    public ArrayList<UserItem> userList = new ArrayList<UserItem>();
     public MutableLiveData<String> loginUser = new MutableLiveData<>();
     public MutableLiveData<String> logoutUser = new MutableLiveData<>();
     public MutableLiveData<Boolean> enterFlag = new MutableLiveData<>();
-
+    public MutableLiveData<SendText> currentText = new MutableLiveData<>();
 
 
     public MainViewModel() {
         /* 변수 초기화 */
-        //ip.setValue("172.30.1.12"); // 경진
-        ip.setValue("192.168.200.105"); // 지호
+
+        ip.setValue("172.30.1.10"); // 지호
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
@@ -51,63 +54,65 @@ public class MainViewModel extends ViewModel {
         settingData.setTopic(topic.getValue());
         settingData.setUserName(userName.getValue());
 
-        // 여기서 Fragment 화면 전환 가능?
     }
 
     public void userInit() {
         /* 변수 초기화 */
-        userList = new ArrayList<String>();
-        userListLivedata = new MutableLiveData<ArrayList<String>>();
+
+        userList = new ArrayList<UserItem>();
+        userListData = new MutableLiveData<ArrayList<UserItem>>();
         loginUser = new MutableLiveData<>();
         logoutUser = new MutableLiveData<>();
         enterFlag = new MutableLiveData<>();
     }
 
+    public void addUserItem(UserItem user){
 
-    public ArrayList<String> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(String user){
         userList.add(user);
-        userListLivedata.postValue(userList);
+        userListData.postValue(userList);
     }
 
-    public void setLoginUser(String user){
-        loginUser.postValue(user);
+    public void deleteUsersItem(String user) {
 
-//        GlobalScope.launch {
-//            loginUser = user;
-//            liveDataLoginUser.postValue(user);
-//        }
+        for(int i = 0; i < userList.size(); i++){
+            String name = userList.get(i).userName;
+            if(name.equals(user)){
+                userList.remove(i);
+                userListData.postValue(userList);
+            }
+        }
+    }
+
+
+    /* Getter */
+    public ArrayList<String> getUserList() {
+        ArrayList<String> users =  new ArrayList<String>();
+        for(int i = 0; i < userList.size(); i++){
+            users.add(userList.get(i).userName);
+        }
+        return users;
+    }
+
+    public SendText getCurrentText() {
+        return currentText.getValue();
     }
 
     public String getLoginUser() {
         return loginUser.getValue();
     }
 
-    public void setLogoutUser(String user){
-        logoutUser.postValue(user);
-    }
-
     public String getLogoutUser() {
         return logoutUser.getValue();
     }
 
-
-    public void deleteUsersList(String user) {
-
-        userList.remove(user);
-        userListLivedata.postValue(userList);
-
-    }
-
-
-    public void setEnterFlag(Boolean flag){
-        enterFlag.setValue(flag);
+    public Boolean getEnterFlag(){
+        return enterFlag.getValue();
     }
 
     /* Setter */
+    public void setLoginUser(String user){
+        loginUser.postValue(user);
+    }
     public void setTopic(String topic) {
         this.topic.setValue(topic);
     }
@@ -115,6 +120,14 @@ public class MainViewModel extends ViewModel {
     public void setName(String name) {
         this.userName.setValue(name);
     }
-
+    public void setCurrentText(SendText text){
+        currentText.postValue(text);
+    }
+    public void setLogoutUser(String user){
+        logoutUser.postValue(user);
+    }
+    public void setEnterFlag(Boolean flag){
+        enterFlag.postValue(flag);
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.example.last_capston;
+package com.example.last_capston.data;
 
 public class Code {
     public class ViewType{

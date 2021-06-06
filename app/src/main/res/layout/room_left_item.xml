@@ -59,8 +59,9 @@
             <TextView
                 android:id="@+id/textv_time"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="데모 2020-03-12 12:30" />
+                android:layout_height="wrap_content"
+                android:text="데모 2020-03-12 12:30"
+                android:textSize="14dp" />
         </LinearLayout>
     </LinearLayout>
 

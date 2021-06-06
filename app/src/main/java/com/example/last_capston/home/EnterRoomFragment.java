@@ -1,15 +1,16 @@
-package com.example.last_capston.view;
+package com.example.last_capston.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.example.last_capston.CloudStorage;
+import com.example.last_capston.main.CloudStorage;
 import com.example.last_capston.R;
 import com.example.last_capston.databinding.FragmentEnterRoomBinding;
 import com.example.last_capston.main.MQTTClient;
@@ -48,13 +49,27 @@ public class EnterRoomFragment extends Fragment {
         });
 
 
-        viewModel.userListLivedata.observe(getViewLifecycleOwner(), new Observer<ArrayList<String>>() {
+        viewModel.enterFlag.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
-            public void onChanged(ArrayList<String> strings) {
+            public void onChanged(Boolean aBoolean) {
                 Navigation.findNavController(binding.getRoot()).navigate(R.id.action_enterRoomFragment_to_chatRoomFragment);
             }
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Toast.makeText(getActivity(), "onDestroyView", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(getActivity(), "onDestroy", Toast.LENGTH_SHORT).show();
+
+
     }
 }
