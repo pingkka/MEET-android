@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.last_capston.home.HomeFragment"
+        android:name="com.example.LastCapston.home.HomeFragment"
         android:label="HomeFragment" >
         <action
             android:id="@+id/action_homeFragment_to_createRoomFragment"
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/createRoomFragment"
-        android:name="com.example.last_capston.home.CreateRoomFragment"
+        android:name="com.example.LastCapston.home.CreateRoomFragment"
         android:label="CreateRoomFragment" >
         <action
             android:id="@+id/action_createRoomFragment_to_chatRoomFragment"
@@ -27,7 +27,7 @@
     </fragment>
     <fragment
         android:id="@+id/enterRoomFragment"
-        android:name="com.example.last_capston.home.EnterRoomFragment"
+        android:name="com.example.LastCapston.home.EnterRoomFragment"
         android:label="EnterRoomFragment" >
         <action
             android:id="@+id/action_enterRoomFragment_to_homeFragment"
@@ -38,7 +38,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatRoomFragment"
-        android:name="com.example.last_capston.calling.ChatRoomFragment"
+        android:name="com.example.LastCapston.calling.ChatRoomFragment"
         android:label="ChatRoomFragment" >
         <action
             android:id="@+id/action_chatRoomFragment_to_homeFragment"
