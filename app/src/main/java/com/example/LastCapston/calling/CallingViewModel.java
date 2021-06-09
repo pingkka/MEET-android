@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel;
 
 import com.example.LastCapston.data.MQTTSettingData;
 import com.example.LastCapston.main.MQTTClient;
+import com.example.LastCapston.main.MainViewModel;
 
 
 import lombok.Getter;
@@ -18,7 +19,7 @@ import lombok.Setter;
 @Setter
 public class CallingViewModel extends AndroidViewModel {
 
-
+   // private static CallingViewModel instance;
     /* MQTT 관련 변수 */
     private MQTTClient client = MQTTClient.getInstance();
     private MQTTSettingData settingData = MQTTSettingData.getInstance();
@@ -42,6 +43,10 @@ public class CallingViewModel extends AndroidViewModel {
     private Boolean emotionFlag = false;
     private EmotionThread emotionThread;
 
+   // /* 싱글톤으로 객체 생성 */
+    //public static CallingViewModel getInstance() {
+        //return instance;
+    //}
     public CallingViewModel(Application application) {
         super(application);
         this.ip = settingData.getIp();

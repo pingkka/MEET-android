@@ -90,9 +90,12 @@ public class EmotionThread extends Thread {
             }
         }  catch (InterruptedException | IOException e) {
             Log.i("Emotion", "Emotion Thread Dead...");
-            if (textFile.exists()) {
-                textFile.delete();
+            if(textFile != null) {
+                if (textFile.exists()) {
+                    textFile.delete();
+                }
             }
+
         }
     }
 

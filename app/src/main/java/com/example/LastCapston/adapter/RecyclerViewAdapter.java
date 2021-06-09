@@ -33,10 +33,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textview;
         public ImageView imageView;
+        public ImageView emotionImageView;
+
         public ViewHolder(View itemView) {
             super(itemView);
             textview = itemView.findViewById(R.id.item_textview);
             imageView = itemView.findViewById(R.id.item_imageView);
+            emotionImageView = itemView.findViewById(R.id.emotionImage);
+
         }
     }
 

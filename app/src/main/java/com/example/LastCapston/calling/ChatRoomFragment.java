@@ -114,7 +114,7 @@ public class ChatRoomFragment extends Fragment {
                 SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
                 Date time = new Date();
                 String timeString = format.format(time);
-                dataList.add(new MessageItem(user + "님이 입장했습니다.", timeString,null, Code.ViewType.CENTER_CONTENT));
+                dataList.add(new MessageItem(user + "님이 입장했습니다.", null,null, timeString, Code.ViewType.CENTER_CONTENT));
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
             }
@@ -127,7 +127,7 @@ public class ChatRoomFragment extends Fragment {
                 SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
                 Date time = new Date();
                 String timeString = format.format(time);
-                dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, timeString, Code.ViewType.CENTER_CONTENT));
+                dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null,timeString, Code.ViewType.CENTER_CONTENT));
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
             }
@@ -137,8 +137,9 @@ public class ChatRoomFragment extends Fragment {
             @Override
             public void onChanged(SendText sendText) {
                 String sendUser =  sendText.sendUser;
-                String Text = sendText.sendText;
-                addText(sendUser, Text);
+                String text = sendText.sendText;
+                String image = sendText.sendImage;
+                addText(sendUser, text, image);
             }
 
         });
@@ -187,13 +188,13 @@ public class ChatRoomFragment extends Fragment {
 
 
     // 채팅창 TEXT추가 함수
-    public void addText(String user, String text){
+    public void addText(String user, String text, String image){
 
         if(client.getUserName().equals(user)){
             SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
             Date time = new Date();
             String timeString = format.format(time);
-            dataList.add(new MessageItem(text, null, timeString,Code.ViewType.RIGHT_CONTENT));
+            dataList.add(new MessageItem(text, null, image, timeString,Code.ViewType.RIGHT_CONTENT));
             recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
 
             recyvlerv.scrollToPosition(dataList.size()-1);
@@ -201,12 +202,13 @@ public class ChatRoomFragment extends Fragment {
             SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
             Date time = new Date();
             String timeString = format.format(time);
-            dataList.add(new MessageItem(text, user, timeString, Code.ViewType.LEFT_CONTENT));
+            dataList.add(new MessageItem(text, null, image, timeString, Code.ViewType.LEFT_CONTENT));
             recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
-
+            recyvlerv.scrollToPosition(dataList.size()-1);
         }
 
     }
+
 
 
     @Override

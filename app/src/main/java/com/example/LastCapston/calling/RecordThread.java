@@ -69,18 +69,18 @@ public class RecordThread extends Thread {
                     audioRecord.stop();
 //
 //                    /* ---------- Button Touch 방식 ---------- */
-//                    audioFile = new File(audioFilePath);
-//                    Log.i("Audio", "audiFile size is " + audioFile.length());
-//                    if(audioFile.length() > 0) {
-//                        if(fos != null) {
-//                            fos.close();
-//                        }
-//                        sttFlag = true;
-//                        synchronized (sttThread.getAudioFilePath()) {
-//                            sttThread.getAudioFilePath().notify();
-//                            Log.i("Stt", "Stt On");
-//                        }
-//                    }
+                    audioFile = new File(audioFilePath);
+                    Log.i("Audio", "audiFile size is " + audioFile.length());
+                    if(audioFile.length() > 0) {
+                        if(fos != null) {
+                            fos.close();
+                        }
+                        sttFlag = true;
+                        synchronized (sttThread.getAudioFilePath()) {
+                            sttThread.getAudioFilePath().notify();
+                            Log.i("Stt", "Stt On");
+                        }
+                    }
                     /* ------------------------------------- */
 
                     synchronized (audioRecord) {
@@ -89,7 +89,7 @@ public class RecordThread extends Thread {
                     recordFlag = true;
 
                     /* ---------- Button Touch 방식 ---------- */
-//                    fos = new FileOutputStream(audioFilePath);
+                    fos = new FileOutputStream(audioFilePath);
                     /* --------------------------------------- */
                 }
 
@@ -102,7 +102,7 @@ public class RecordThread extends Thread {
                 publishAudioData(audioData);
 
                 /* ---------- Button Touch 방식 ---------- */
-                //fos.write(audioData, 0, bufferSize); // 파일에 읽은 audioData 저장
+                fos.write(audioData, 0, bufferSize); // 파일에 읽은 audioData 저장
                 /* -------------------------------------- */
 
 
@@ -136,7 +136,7 @@ public class RecordThread extends Thread {
                 /*---------------------------------- */
 
             }
-        } catch (InterruptedException E) {
+        } catch (InterruptedException | IOException E) {
             Log.i("Audio", "Audio Thread Dead...");
             if(audioFile.exists()) {
                 audioFile.delete();

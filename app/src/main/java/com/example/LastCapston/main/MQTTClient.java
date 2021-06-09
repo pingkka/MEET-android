@@ -260,12 +260,22 @@ public class MQTTClient implements MqttCallbackExtended {
         /* roomID/text */
         if(topic.equals(topic_text)) {
             String text = new String(message.getPayload(), "UTF-8");
-            int idx = text.indexOf("&");
-            String sendTextUser = text.substring(0, idx);
-            String sendtext = text.substring(idx + 1);
+//            int idx = text.indexOf("&");
+//            String sendTextUser = text.substring(0, idx);
+//            String sendtext = text.substring(idx + 1);
+
+            String[] textArray = text.split("&");
+            for(int i=0;i<textArray.length;i++) {
+                System.out.println(textArray[i]);
+            }
+            String sendTextUser = textArray[0];
+            String sendtext = textArray[1];
+            String sendImage = textArray[2];
+
             Log.i("MQTT", "sendTextUser = " + sendTextUser);
             Log.i("MQTT", "sendtext = " + sendtext);
-            SendText sendText = new SendText(sendTextUser, sendtext);
+            Log.i("MQTT", "sendtext = " + sendImage);
+            SendText sendText = new SendText(sendTextUser, sendtext, sendImage);
             mainViewModel.setCurrentText(sendText);
             Log.i("MQTT", "text = " + text);
 
