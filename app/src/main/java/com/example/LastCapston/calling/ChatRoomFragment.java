@@ -79,7 +79,11 @@ public class ChatRoomFragment extends Fragment {
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    binding.btnMic.setImageResource(R.drawable.mic_on);
+                    callingViewModel.touchMic();
+                    break;
                 case MotionEvent.ACTION_UP:
+                    binding.btnMic.setImageResource(R.drawable.mic_off);
                     callingViewModel.touchMic();
                     break;
 

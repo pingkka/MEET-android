@@ -9,13 +9,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#9FA8DA"
+        android:background="#003E8B"
         android:minHeight="55dp">
 
         <ImageView
             android:id="@+id/enter_home_button"
-            android:layout_width="43dp"
-            android:layout_height="46dp"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,16 +32,12 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView8"
+        <ImageView
+            android:id="@+id/appLogoImage"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:layout_weight="3"
-            android:gravity="center"
-            android:text="MEET"
-            android:textSize="80sp"
-            tools:ignore="NestedWeights" />
+            android:layout_height="wrap_content"
+            android:background="#003E8B"
+            app:srcCompat="@drawable/app_logo" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

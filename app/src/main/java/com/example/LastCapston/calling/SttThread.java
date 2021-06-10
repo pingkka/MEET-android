@@ -138,7 +138,6 @@ public class SttThread extends Thread {
                         }
                         else { // errorCalled
                             Log.i("Stt", "errorCalled");
-
                         }
 
                     } else {
