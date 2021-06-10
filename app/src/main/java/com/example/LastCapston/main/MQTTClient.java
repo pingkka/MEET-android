@@ -32,16 +32,23 @@ public class MQTTClient implements MqttCallbackExtended {
     private static MQTTClient instance;
 
     /* MQTT 관련 변수 */
+    //connect함수에서 초기화
+    private String BROKER;
     private MqttClient client;
     private MqttClient client2;
-    private String BROKER;
     private int qos = 0;
-
-    public MQTTSettingData settingData = MQTTSettingData.getInstance();
     private MqttConnectOptions connectOptions;
+    //create, enter뷰에서 초기화 된다
+    public MQTTSettingData settingData = MQTTSettingData.getInstance();
+
+
+
 
     /* TOPIC */
+    /* 처음 초기화하는 변수 */
     private String topic;
+    private String userName;
+
     private String topic_audio;
     private String topic_login;
     private String topic_login_audio;
@@ -50,22 +57,17 @@ public class MQTTClient implements MqttCallbackExtended {
     private String topic_text;
     private String topic_emotion;
 
-    private String userName;
-
-    public CallingViewModel callingViewModel;
-    private MainViewModel mainViewModel;
-
-    //정리해야 할 변수
     public ArrayList<String> participantsList = new ArrayList<>(100);
     private List<PlayThread> playThreadList = new ArrayList<>(100);
+    private MainViewModel mainViewModel;
 
-
-
+    /* 나중에 초기화하는 변수 */
+    public CallingViewModel callingViewModel;
 
     private String recvMsg;
-    private String beforeLoginUser = "";
-    private String beforeLogoutUser = "";
-    private Context context;
+//    private String beforeLoginUser;
+//    private String beforeLogoutUser;
+    //private Context context;
 
     public static MQTTClient getInstance() {
         if(instance == null) {
@@ -193,24 +195,20 @@ public class MQTTClient implements MqttCallbackExtended {
         /* /roomID/login */
         if (topic.equals(topic_login)) {
             String name = new String(message.getPayload(), "UTF-8");
+            UserItem newUser = new UserItem(name);
+            setParticipantsList(newUser);
 
-            //가끔 mqtt를 여러번 인식하는 오류가 있어서 두번 인식하지 못하게 하는 코드
-            if (!beforeLoginUser.equals(name)) {
-                UserItem newUser = new UserItem(name);
-                setParticipantsList(newUser);
+            //로그인 topic을 받으면 저장
+            mainViewModel.setLoginUser(name);
 
-                //로그인 topic을 받으면 저장
-                mainViewModel.setLoginUser(name);
-                beforeLoginUser = name;
-            }
         }
 
-        if(topic.equals(topic_login_audio)) {
+        if (topic.equals(topic_login_audio)) {
             String name = new String(message.getPayload(), "UTF-8");
 
             PlayThread playThread = new PlayThread();
             playThread.setUserName(name);
-            if(callingViewModel.getPlayFlag())
+            if (callingViewModel.getPlayFlag())
                 playThread.setPlayFlag(true);
             playThread.start();
 
@@ -218,7 +216,6 @@ public class MQTTClient implements MqttCallbackExtended {
             Log.i("MQTT", "playThreadList add " + name);
             publish(topic_notifyUSer, userName);
         }
-
 
         /* /roomID/notifyUser */
         if (topic.equals(topic_notifyUSer)) {
@@ -229,7 +226,7 @@ public class MQTTClient implements MqttCallbackExtended {
 
             PlayThread playThread = new PlayThread();
             playThread.setUserName(name);
-            if(callingViewModel.getPlayFlag())
+            if (callingViewModel.getPlayFlag())
                 playThread.setPlayFlag(true);
             playThread.start();
 
@@ -238,7 +235,7 @@ public class MQTTClient implements MqttCallbackExtended {
         }
 
         /* /roomID/audio */
-        if(topic.equals(topic_audio)) {
+        if (topic.equals(topic_audio)) {
             byte[] messageData = message.getPayload();
 
             byte[] nameData = Arrays.copyOfRange(messageData, 0, messageData.length - 80000);
@@ -246,7 +243,7 @@ public class MQTTClient implements MqttCallbackExtended {
 
             if (sender.equals(userName)) return;
             byte[] audioData = Arrays.copyOfRange(messageData, nameData.length, messageData.length);
-            for (PlayThread playThread: playThreadList) {
+            for (PlayThread playThread : playThreadList) {
                 if (playThread.getUserName().equals(sender)) {
                     if (playThread.getAudioQueue().size() >= 5) {
                         playThread.getAudioQueue().clear();
@@ -258,56 +255,54 @@ public class MQTTClient implements MqttCallbackExtended {
         }
 
         /* roomID/text */
-        if(topic.equals(topic_text)) {
+        if (topic.equals(topic_text)) {
             String text = new String(message.getPayload(), "UTF-8");
-//            int idx = text.indexOf("&");
-//            String sendTextUser = text.substring(0, idx);
-//            String sendtext = text.substring(idx + 1);
 
             String[] textArray = text.split("&");
-            for(int i=0;i<textArray.length;i++) {
+            for (int i = 0; i < textArray.length; i++) {
                 System.out.println(textArray[i]);
             }
             String sendTextUser = textArray[0];
             String sendtext = textArray[1];
             String sendImage = textArray[2];
 
+            Log.i("MQTT", "text = " + text);
             Log.i("MQTT", "sendTextUser = " + sendTextUser);
             Log.i("MQTT", "sendtext = " + sendtext);
             Log.i("MQTT", "sendtext = " + sendImage);
             SendText sendText = new SendText(sendTextUser, sendtext, sendImage);
             mainViewModel.setCurrentText(sendText);
-            Log.i("MQTT", "text = " + text);
+
 
         }
 
         /* roomID/emotion */
-        if(topic.equals(topic_emotion)) {
+        if (topic.equals(topic_emotion)) {
             String emotion = new String(message.getPayload(), "UTF-8");
             Log.i("MQTT", "emotion = " + emotion);
         }
 
         /* roomID/logout */
-        if(topic.equals(topic_logout)){
+        if (topic.equals(topic_logout)) {
             String name = new String(message.getPayload(), "UTF-8");
 
 
-            for(int i=0; i<participantsList.size(); i++) {
-                if(participantsList.get(i).equals(name)) {
-                    if(!beforeLogoutUser.equals(name)) {
-                        mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
-                        beforeLogoutUser = name;
-                        Log.i("MQTT", "userList remove " + name);
-                    }
-                    //참여인원들에게 나갔다고 알리기
-                    UserItem newUser = new UserItem(name);
-                    deleteParticipant(newUser);
-                    break;
+            for (int i = 0; i < participantsList.size(); i++) {
+                if (participantsList.get(i).equals(name)) {
+//                    if(!beforeLogoutUser.equals(name)) {
+                    mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
+//                        beforeLogoutUser = name;
+                    Log.i("MQTT", "userList remove " + name);
                 }
+                //참여인원들에게 나갔다고 알리기
+                UserItem newUser = new UserItem(name);
+                deleteParticipant(newUser);
+                break;
             }
 
-            for(int i=0; i<playThreadList.size(); i++) {
-                if(playThreadList.get(i).getUserName().equals(name)) {
+
+            for (int i = 0; i < playThreadList.size(); i++) {
+                if (playThreadList.get(i).getUserName().equals(name)) {
                     playThreadList.get(i).setPlayFlag(false);
                     playThreadList.get(i).getAudioQueue().clear();
                     playThreadList.get(i).stopPlaying();
@@ -317,28 +312,28 @@ public class MQTTClient implements MqttCallbackExtended {
                     Log.i("MQTT", "after playThreadList remove " + name + "size(" + playThreadList.size() + ")");
                 }
             }
+
+            /* Other Topic */
         }
-
-
-
-
-
-
-
-        /* Other Topic */
     }
+
+
+
+
+
+
+
+
+
 
 
     //participantsList
     public void setParticipantsList( UserItem user) throws Exception {
 
         if(!participantsList.contains(user.userName)){
-
             mainViewModel.addUserItem(user);
             participantsList.add(user.userName);
             Log.i("MQTT", "userList add " + user);
-
-
         }
     }
 
@@ -347,11 +342,6 @@ public class MQTTClient implements MqttCallbackExtended {
         participantsList.remove(user.userName);
         mainViewModel.deleteUsersItem(user.userName);
     }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
 
 
     @Override

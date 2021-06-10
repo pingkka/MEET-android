@@ -63,7 +63,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/enterRoomID"
+            android:id="@+id/roomID"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -82,10 +82,10 @@
             android:text="방 비밀번호"
             android:textSize="14dp"
             app:layout_constraintStart_toStartOf="@+id/textView4"
-            app:layout_constraintTop_toBottomOf="@+id/enterRoomID" />
+            app:layout_constraintTop_toBottomOf="@+id/roomID" />
 
         <EditText
-            android:id="@+id/enterRoomPW"
+            android:id="@+id/roomPW"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -103,11 +103,11 @@
             android:layout_marginTop="24dp"
             android:text="사용자 이름"
             android:textSize="14dp"
-            app:layout_constraintStart_toStartOf="@+id/enterRoomPW"
-            app:layout_constraintTop_toBottomOf="@+id/enterRoomPW" />
+            app:layout_constraintStart_toStartOf="@+id/roomPW"
+            app:layout_constraintTop_toBottomOf="@+id/roomPW" />
 
         <EditText
-            android:id="@+id/enterUserID"
+            android:id="@+id/userID"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -129,7 +129,7 @@
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/enterExit"
-            app:layout_constraintTop_toBottomOf="@+id/enterUserID" />
+            app:layout_constraintTop_toBottomOf="@+id/userID" />
 
         <Button
             android:id="@+id/enterExit"
