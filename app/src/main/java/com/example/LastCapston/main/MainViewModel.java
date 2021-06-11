@@ -29,7 +29,6 @@ public class MainViewModel extends ViewModel {
     public ArrayList<UserItem> userList = new ArrayList<UserItem>();
     public MutableLiveData<String> loginUser = new MutableLiveData<>();
     public MutableLiveData<String> logoutUser = new MutableLiveData<>();
-    public MutableLiveData<Boolean> enterFlag = new MutableLiveData<>();
     public MutableLiveData<SendText> currentText = new MutableLiveData<>();
 
 
@@ -57,14 +56,18 @@ public class MainViewModel extends ViewModel {
 
     }
 
-    public void userInit() {
+    public void initMQTTSettingData() {
         /* 변수 초기화 */
+        topic.setValue("");
+        userName.setValue("");
+    }
 
+    public void mainViewMoedlInit() {
+        /* 변수 초기화 */
         userList = new ArrayList<UserItem>();
         userListData = new MutableLiveData<ArrayList<UserItem>>();
         loginUser = new MutableLiveData<>();
         logoutUser = new MutableLiveData<>();
-        enterFlag = new MutableLiveData<>();
     }
 
 
@@ -106,9 +109,7 @@ public class MainViewModel extends ViewModel {
         return logoutUser.getValue();
     }
 
-    public Boolean getEnterFlag(){
-        return enterFlag.getValue();
-    }
+
 
     /* Setter */
     public void setLoginUser(String user){
@@ -126,9 +127,6 @@ public class MainViewModel extends ViewModel {
     }
     public void setLogoutUser(String user){
         logoutUser.postValue(user);
-    }
-    public void setEnterFlag(Boolean flag){
-        enterFlag.postValue(flag);
     }
 
 }

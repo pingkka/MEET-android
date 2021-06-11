@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import lombok.SneakyThrows;
@@ -296,7 +297,10 @@ public class ChatRoomFragment extends Fragment {
         }
 
         /* PlayThreadList의 모든 PlayThread interrupt 및 PlayThreadList 초기화*/
-        for(PlayThread playThread : client.getPlayThreadList()) {
+        //java.util.ConcurrentModificationException 원인 및 처리 방법
+        //index가 실시간으로 변하기 때문에 발생하는 오류
+        for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();){
+            PlayThread playThread = itr.next();
             if(callingViewModel.getPlayFlag()) {
                 playThread.setPlayFlag(false);
             }
@@ -307,6 +311,17 @@ public class ChatRoomFragment extends Fragment {
             }
             playThread.interrupt();
         }
+//        for(PlayThread playThread : client.getPlayThreadList()) {
+//            if(callingViewModel.getPlayFlag()) {
+//                playThread.setPlayFlag(false);
+//            }
+//
+//            playThread.stopPlaying();
+//            synchronized (playThread.getAudioQueue()) {
+//                playThread.getAudioQueue().clear();
+//            }
+//            playThread.interrupt();
+//        }
 
         client.getPlayThreadList().clear();
 
