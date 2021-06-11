@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#9FA8DA"
+        android:background="#003E8B"
         android:minHeight="55dp">
 
 
@@ -19,18 +19,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="3"
-        android:background="#9FA8DA"
+        android:background="#003E8B"
         android:gravity="center"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView8"
+
+        <ImageView
+            android:id="@+id/appLogoImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="MEET"
-            android:textSize="80sp" />
+            app:srcCompat="@drawable/app_logo" />
+
     </LinearLayout>
 
     <LinearLayout

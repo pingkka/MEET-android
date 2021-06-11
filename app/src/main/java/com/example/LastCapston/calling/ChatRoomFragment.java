@@ -94,7 +94,11 @@ public class ChatRoomFragment extends Fragment {
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    binding.btnMic.setImageResource(R.drawable.mic_on);
+                    callingViewModel.touchMic();
+                    break;
                 case MotionEvent.ACTION_UP:
+                    binding.btnMic.setImageResource(R.drawable.mic_off);
                     callingViewModel.touchMic();
                     break;
 
@@ -230,8 +234,28 @@ public class ChatRoomFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        String roomID = client.settingData.getTopic();
+        String user = client.settingData.getUserName();
+        System.out.println(viewModel.getUserList().toString());
+        client.publish(roomID+"/logout", user);
+        ArrayList<String> userList = viewModel.getUserList();
+        logout();
+        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+        databaseLogout(userList, roomID, user);
 
-        observeTextFlag = false;
+        /* MQTTClient 연결 해제 */
+
+        client.getParticipantsList().clear();
+        client.getConnectOptions().setAutomaticReconnect(false);
+
+        /* view모델 초기화 */
+        //MQTTSettingData 초기화
+        viewModel.initMQTTSettingData();
+        //mainViewmodel 초기화
+        viewModel.mainViewMoedlInit();
+    }
+
+    private void logout(){
         /* 이전의 출력된 텍스트 지우기 */
         dataList.clear();
 
@@ -276,6 +300,7 @@ public class ChatRoomFragment extends Fragment {
             if(callingViewModel.getPlayFlag()) {
                 playThread.setPlayFlag(false);
             }
+
             playThread.stopPlaying();
             synchronized (playThread.getAudioQueue()) {
                 playThread.getAudioQueue().clear();
@@ -293,23 +318,13 @@ public class ChatRoomFragment extends Fragment {
         client.getParticipantsList().clear();
         client.disconnect();
         client.getConnectOptions().setAutomaticReconnect(false);
-
-        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-        String roomID = client.settingData.getTopic();
-        String user = client.settingData.getUserName();
-        System.out.println(viewModel.getUserList().toString());
-        logout(roomID, user);
-        /* view모델 초기화 */
-        //MQTTSettingData 초기화
-        viewModel.initMQTTSettingData();
-        //mainViewmodel 초기화
-        viewModel.mainViewMoedlInit();
     }
 
 
     /* 로그아웃시 firebase에서 삭제해주는 함수 */
-    public void logout(String roomID, String user) throws Exception {
-        ArrayList<String> userList = viewModel.getUserList();
+    public void databaseLogout(ArrayList<String> userList, String roomID, String user) throws Exception {
+        System.out.println(userList.size());
+
         DocumentReference docRef = db.collection("rooms").document(roomID);
         if (userList.size() == 1) {
             docRef
@@ -335,16 +350,6 @@ public class ChatRoomFragment extends Fragment {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Log.w(TAG, "아직 방에 사람 있음");
-//                    //나갔다고 알리기
-//                    client.publish(roomID+"/logout", user);
-//
-//                    //view모델 초기화
-//                    viewModel.mainViewMoedlInit();
-//
-//                    /* MQTTClient 연결 해제 */
-//                    client.getParticipantsList().clear();
-//                    client.disconnect();
-//                    client.getConnectOptions().setAutomaticReconnect(false);
 
 
                 }
