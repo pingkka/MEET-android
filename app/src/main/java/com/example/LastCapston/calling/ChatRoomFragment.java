@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -22,7 +21,6 @@ import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
-import com.example.LastCapston.main.CloudStorage;
 
 import com.example.LastCapston.adapter.ChatMessageAdapter;
 import com.example.LastCapston.adapter.RecyclerViewAdapter;
@@ -58,7 +56,6 @@ public class ChatRoomFragment extends Fragment {
     private MQTTClient client = MQTTClient.getInstance();
     private MainViewModel viewModel = MainViewModel.getInstance();
     private CallingViewModel callingViewModel;
-    private CloudStorage storage = new CloudStorage(getActivity(), viewModel);
 
     //참여자 리스트
     private RecyclerView listView;
@@ -86,11 +83,6 @@ public class ChatRoomFragment extends Fragment {
 
 
 /* ----------------------------------    OnClickListener 함수        ---------------------------------------------------------------------------------*/
-        //참여자 목록 확인하는 버튼
-//        binding.button.setOnClickListener(v -> {
-//            Toast.makeText(getActivity(), viewModel.getUserList().toString(), Toast.LENGTH_SHORT).show();
-//            client.publish(client.getTopic_text(), client.getUserName() + "&" +"good"+ "&" +"화남");
-//        });
 
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -235,28 +227,8 @@ public class ChatRoomFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        String roomID = client.settingData.getTopic();
-        String user = client.settingData.getUserName();
-        System.out.println(viewModel.getUserList().toString());
-        client.publish(roomID+"/logout", user);
-        ArrayList<String> userList = viewModel.getUserList();
-        logout();
-        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-        databaseLogout(userList, roomID, user);
 
-        /* MQTTClient 연결 해제 */
-
-        client.getParticipantsList().clear();
-        client.getConnectOptions().setAutomaticReconnect(false);
-
-        /* view모델 초기화 */
-        //MQTTSettingData 초기화
-        viewModel.initMQTTSettingData();
-        //mainViewmodel 초기화
-        viewModel.mainViewMoedlInit();
-    }
-
-    private void logout(){
+        observeTextFlag = false;
         /* 이전의 출력된 텍스트 지우기 */
         dataList.clear();
 
@@ -297,31 +269,16 @@ public class ChatRoomFragment extends Fragment {
         }
 
         /* PlayThreadList의 모든 PlayThread interrupt 및 PlayThreadList 초기화*/
-        //java.util.ConcurrentModificationException 원인 및 처리 방법
-        //index가 실시간으로 변하기 때문에 발생하는 오류
-        for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();){
-            PlayThread playThread = itr.next();
+        for(PlayThread playThread : client.getPlayThreadList()) {
             if(callingViewModel.getPlayFlag()) {
                 playThread.setPlayFlag(false);
             }
-
             playThread.stopPlaying();
             synchronized (playThread.getAudioQueue()) {
                 playThread.getAudioQueue().clear();
             }
             playThread.interrupt();
         }
-//        for(PlayThread playThread : client.getPlayThreadList()) {
-//            if(callingViewModel.getPlayFlag()) {
-//                playThread.setPlayFlag(false);
-//            }
-//
-//            playThread.stopPlaying();
-//            synchronized (playThread.getAudioQueue()) {
-//                playThread.getAudioQueue().clear();
-//            }
-//            playThread.interrupt();
-//        }
 
         client.getPlayThreadList().clear();
 
@@ -333,13 +290,22 @@ public class ChatRoomFragment extends Fragment {
         client.getParticipantsList().clear();
         client.disconnect();
         client.getConnectOptions().setAutomaticReconnect(false);
+
+        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+        String roomID = client.settingData.getTopic();
+        String user = client.settingData.getUserName();
+        System.out.println(viewModel.getUserList().toString());
+        logout(roomID, user);
+        /* view모델 초기화 */
+        //MQTTSettingData 초기화
+        viewModel.initMQTTSettingData();
+        //mainViewmodel 초기화
+        viewModel.mainViewMoedlInit();
     }
 
-
     /* 로그아웃시 firebase에서 삭제해주는 함수 */
-    public void databaseLogout(ArrayList<String> userList, String roomID, String user) throws Exception {
-        System.out.println(userList.size());
-
+    public void logout(String roomID, String user) throws Exception {
+        ArrayList<String> userList = viewModel.getUserList();
         DocumentReference docRef = db.collection("rooms").document(roomID);
         if (userList.size() == 1) {
             docRef
@@ -365,11 +331,20 @@ public class ChatRoomFragment extends Fragment {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Log.w(TAG, "아직 방에 사람 있음");
+//                    //나갔다고 알리기
+//                    client.publish(roomID+"/logout", user);
+//
+//                    //view모델 초기화
+//                    viewModel.mainViewMoedlInit();
+//
+//                    /* MQTTClient 연결 해제 */
+//                    client.getParticipantsList().clear();
+//                    client.disconnect();
+//                    client.getConnectOptions().setAutomaticReconnect(false);
 
 
                 }
             });
         }
-
     }
 }

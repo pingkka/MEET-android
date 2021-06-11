@@ -283,16 +283,23 @@ public class MQTTClient implements MqttCallbackExtended {
         }
 
         /* roomID/logout */
+        /* roomID/logout */
         if (topic.equals(topic_logout)) {
             String name = new String(message.getPayload(), "UTF-8");
-            Log.i("MQTT", "logout = " + name);
 
-            mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
-            Log.i("MQTT", "userList remove " + name);
-            //참여인원들에게 나갔다고 알리기
-            UserItem newUser = new UserItem(name);
-            deleteParticipant(newUser);
 
+            for (int i = 0; i < participantsList.size(); i++) {
+                if (participantsList.get(i).equals(name)) {
+//                    if(!beforeLogoutUser.equals(name)) {
+                    mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
+//                        beforeLogoutUser = name;
+                    Log.i("MQTT", "userList remove " + name);
+                }
+                //참여인원들에게 나갔다고 알리기
+                UserItem newUser = new UserItem(name);
+                deleteParticipant(newUser);
+                break;
+            }
 
 
             for (int i = 0; i < playThreadList.size(); i++) {
@@ -306,9 +313,9 @@ public class MQTTClient implements MqttCallbackExtended {
                     Log.i("MQTT", "after playThreadList remove " + name + "size(" + playThreadList.size() + ")");
                 }
             }
-
-            /* Other Topic */
         }
+
+        /* Other Topic */
     }
 
 

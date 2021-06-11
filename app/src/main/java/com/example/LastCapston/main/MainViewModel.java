@@ -35,8 +35,7 @@ public class MainViewModel extends ViewModel {
 
     public MainViewModel() {
         /* 변수 초기화 */
-        ip.setValue("113.198.82.77"); // 경진
-        //ip.setValue("223.194.153.241"); // 지호
+        ip.setValue("113.198.82.77");
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
@@ -55,18 +54,21 @@ public class MainViewModel extends ViewModel {
         settingData.setUserName(userName.getValue());
     }
 
-    public void initMQTTSettingData() {
-        /* 변수 초기화 */
-        topic.setValue("");
-        userName.setValue("");
+    public void initMQTTSettingData(){
+        settingData.setTopic("");
+        settingData.setUserName("");
     }
 
     public void mainViewMoedlInit() {
         /* 변수 초기화 */
+        topic.setValue("");
+        userName.setValue("");
         userList = new ArrayList<UserItem>();
         userListData = new MutableLiveData<ArrayList<UserItem>>();
         loginUser = new MutableLiveData<>();
         logoutUser = new MutableLiveData<>();
+        currentText = new MutableLiveData<>();
+        //enterFlag = new MutableLiveData<>();
     }
 
 
@@ -96,19 +98,20 @@ public class MainViewModel extends ViewModel {
         return users;
     }
 
-    public SendText getCurrentText() {
-        return currentText.getValue();
-    }
+//    public SendText getCurrentText() {
+//        return currentText.getValue();
+//    }
 
     public String getLoginUser() {
         return loginUser.getValue();
     }
-
     public String getLogoutUser() {
         return logoutUser.getValue();
     }
 
-
+    //public Boolean getEnterFlag(){
+    //return enterFlag.getValue();
+    //}
 
     /* Setter */
     public void setLoginUser(String user){
@@ -127,5 +130,8 @@ public class MainViewModel extends ViewModel {
     public void setLogoutUser(String user){
         logoutUser.postValue(user);
     }
+    //public void setEnterFlag(Boolean flag){
+    //enterFlag.postValue(flag);
+    //}
 
 }
