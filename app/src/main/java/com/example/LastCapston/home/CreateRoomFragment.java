@@ -5,18 +5,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.navigation.Navigation;
 
 import com.example.LastCapston.R;
 import com.example.LastCapston.data.MQTTSettingData;
 import com.example.LastCapston.databinding.FragmentCreateRoomBinding;
-import com.example.LastCapston.main.CloudStorage;
 import com.example.LastCapston.main.MQTTClient;
 import com.example.LastCapston.main.MainViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;

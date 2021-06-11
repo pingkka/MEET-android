@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.LastCapston.R;
 import com.example.LastCapston.data.UserItem;
+import com.example.LastCapston.data.UserSpeakState;
 import com.example.LastCapston.main.MainViewModel;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -71,6 +72,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-
+    public void notifyDataSetChanged(UserSpeakState userSpeakState) {
+        for(int i=0; 0 < mainViewModel.userList.size(); i++){
+//            horder.
+        }
+    }
 
 }

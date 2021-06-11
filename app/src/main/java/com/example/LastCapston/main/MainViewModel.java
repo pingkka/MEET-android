@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.LastCapston.data.MQTTSettingData;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
+import com.example.LastCapston.data.UserSpeakState;
 
 import java.util.ArrayList;
 
@@ -30,13 +31,15 @@ public class MainViewModel extends ViewModel {
     public MutableLiveData<String> loginUser = new MutableLiveData<>();
     public MutableLiveData<String> logoutUser = new MutableLiveData<>();
     public MutableLiveData<SendText> currentText = new MutableLiveData<>();
-
+    public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>();
 
     public MainViewModel() {
         /* 변수 초기화 */
 
         ip.setValue("223.194.153.241"); // 지호
         port.setValue("1883");
+//        ip.setValue("113.198.82.77");
+//        port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
 
@@ -124,6 +127,9 @@ public class MainViewModel extends ViewModel {
     }
     public void setCurrentText(SendText text){
         currentText.postValue(text);
+    }
+    public void setUserSpeakState(UserSpeakState userSpeakState){
+        this.userSpeakState.postValue(userSpeakState);
     }
     public void setLogoutUser(String user){
         logoutUser.postValue(user);

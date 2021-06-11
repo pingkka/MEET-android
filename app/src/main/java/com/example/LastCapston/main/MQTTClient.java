@@ -9,6 +9,7 @@ import com.example.LastCapston.calling.CallingViewModel;
 import com.example.LastCapston.calling.PlayThread;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
+import com.example.LastCapston.data.UserSpeakState;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -56,6 +57,8 @@ public class MQTTClient implements MqttCallbackExtended {
     private String topic_logout;
     private String topic_text;
     private String topic_emotion;
+    private String topic_speakMark;
+
 
     public ArrayList<String> participantsList = new ArrayList<>(100);
     private List<PlayThread> playThreadList = new ArrayList<>(100);
@@ -93,7 +96,7 @@ public class MQTTClient implements MqttCallbackExtended {
         topic_logout = topic + "/logout";
         topic_text = topic + "/text";
         topic_emotion = topic + "/emotion";
-
+        topic_speakMark = topic + "/topic_speakMark";
         this.mainViewModel = mainViewModel;
     }
 
@@ -151,6 +154,7 @@ public class MQTTClient implements MqttCallbackExtended {
         subscribe(topic_logout);
         subscribe(topic_text);
         subscribe(topic_emotion);
+        subscribe(topic_speakMark);
     }
 
     /* 문자 data publish */
@@ -280,6 +284,22 @@ public class MQTTClient implements MqttCallbackExtended {
         if (topic.equals(topic_emotion)) {
             String emotion = new String(message.getPayload(), "UTF-8");
             Log.i("MQTT", "emotion = " + emotion);
+        }
+
+        /* roomID/speakMark */
+        if (topic.equals(topic_speakMark)) {
+            String speakUserAndState = new String(message.getPayload(), "UTF-8");
+            Log.i("MQTT", "speakUserAndState = " + speakUserAndState);
+            String[] textArray = speakUserAndState.split("&");
+            for (int i = 0; i < textArray.length; i++) {
+                System.out.println(textArray[i]);
+            }
+            String speakUser = textArray[0];
+            String speakState = textArray[1];
+            Log.i("MQTT", "speakUser = " + speakUser);
+            Log.i("MQTT", "speakState = " + speakState);
+            UserSpeakState userSpeakState = new UserSpeakState(speakUser, speakState);
+            mainViewModel.setUserSpeakState(userSpeakState);
         }
 
         /* roomID/logout */
