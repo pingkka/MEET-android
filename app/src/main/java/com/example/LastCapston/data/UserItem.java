@@ -7,7 +7,7 @@ public class UserItem {
         public String userName;
         public UserItem(String userName){
             this.userName = userName;
-            this.userIcon = "@drawable/ic_baseline_person_24";
+            this.userIcon = "@drawable/user_off";
         }
 
 }

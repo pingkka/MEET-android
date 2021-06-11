@@ -71,10 +71,10 @@ public class ChatRoomFragment extends Fragment {
 
 /* ----------------------------------    OnClickListener 함수        ---------------------------------------------------------------------------------*/
         //참여자 목록 확인하는 버튼
-        binding.button.setOnClickListener(v -> {
-            Toast.makeText(getActivity(), viewModel.getUserList().toString(), Toast.LENGTH_SHORT).show();
-            client.publish(client.getTopic_text(), client.getUserName() + "&" +"good"+ "&" +"화남");
-        });
+//        binding.button.setOnClickListener(v -> {
+//            Toast.makeText(getActivity(), viewModel.getUserList().toString(), Toast.LENGTH_SHORT).show();
+//            client.publish(client.getTopic_text(), client.getUserName() + "&" +"good"+ "&" +"화남");
+//        });
 
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {

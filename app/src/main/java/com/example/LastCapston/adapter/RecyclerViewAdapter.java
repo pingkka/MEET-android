@@ -60,7 +60,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         UserItem item = mainViewModel.userList.get(position);
         holder.textview.setText(item.userName);
-        holder.imageView.setImageResource(R.drawable.ic_baseline_person_24);
+        holder.imageView.setImageResource(R.drawable.user_off);
         //holder.textview.setTag(item);
         //holder.textview.setOnClickListener(onClickItem);
     }
