@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.LastCapston.data.MQTTSettingData;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
+import com.example.LastCapston.data.UserSpeakState;
 
 import java.util.ArrayList;
 
@@ -25,13 +26,12 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> topic = new MutableLiveData<>();
     private MutableLiveData<String> userName = new MutableLiveData<>();
 
-    /* observe를 사용하는 liveData 변수 */
     public MutableLiveData<ArrayList<UserItem>> userListData = new MutableLiveData<ArrayList<UserItem>>();
     public ArrayList<UserItem> userList = new ArrayList<UserItem>();
     public MutableLiveData<String> loginUser = new MutableLiveData<>();
     public MutableLiveData<String> logoutUser = new MutableLiveData<>();
     public MutableLiveData<SendText> currentText = new MutableLiveData<>();
-
+    public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>();
 
     public MainViewModel() {
         /* 변수 초기화 */
@@ -39,6 +39,7 @@ public class MainViewModel extends ViewModel {
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
+
     }
 
     /* 싱글톤으로 객체 생성 */
@@ -52,23 +53,21 @@ public class MainViewModel extends ViewModel {
         settingData.setPort(port.getValue());
         settingData.setTopic(topic.getValue());
         settingData.setUserName(userName.getValue());
+
     }
 
-    public void initMQTTSettingData(){
-        settingData.setTopic("");
-        settingData.setUserName("");
+    public void initMQTTSettingData() {
+        /* 변수 초기화 */
+        topic.setValue("");
+        userName.setValue("");
     }
 
     public void mainViewMoedlInit() {
         /* 변수 초기화 */
-        topic.setValue("");
-        userName.setValue("");
         userList = new ArrayList<UserItem>();
         userListData = new MutableLiveData<ArrayList<UserItem>>();
         loginUser = new MutableLiveData<>();
         logoutUser = new MutableLiveData<>();
-        currentText = new MutableLiveData<>();
-        //enterFlag = new MutableLiveData<>();
     }
 
 
@@ -98,20 +97,19 @@ public class MainViewModel extends ViewModel {
         return users;
     }
 
-//    public SendText getCurrentText() {
-//        return currentText.getValue();
-//    }
+    public SendText getCurrentText() {
+        return currentText.getValue();
+    }
 
     public String getLoginUser() {
         return loginUser.getValue();
     }
+
     public String getLogoutUser() {
         return logoutUser.getValue();
     }
 
-    //public Boolean getEnterFlag(){
-    //return enterFlag.getValue();
-    //}
+
 
     /* Setter */
     public void setLoginUser(String user){
@@ -127,11 +125,11 @@ public class MainViewModel extends ViewModel {
     public void setCurrentText(SendText text){
         currentText.postValue(text);
     }
+    public void setUserSpeakState(UserSpeakState userSpeakState){
+        this.userSpeakState.postValue(userSpeakState);
+    }
     public void setLogoutUser(String user){
         logoutUser.postValue(user);
     }
-    //public void setEnterFlag(Boolean flag){
-    //enterFlag.postValue(flag);
-    //}
 
 }
