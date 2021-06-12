@@ -34,7 +34,6 @@ public class ClearService extends Service {
         Log.d("ClearService", "Service Destroyed");
     }
 
-
     @SneakyThrows
     @Override
     public void onTaskRemoved(Intent rootIntent) {
@@ -43,5 +42,4 @@ public class ClearService extends Service {
         String user = client.settingData.getUserName();
         client.publish(roomID+"/logout", user);
     }
-
 }

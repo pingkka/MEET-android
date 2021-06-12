@@ -131,13 +131,3 @@ public class CreateRoomFragment extends Fragment{
     }
 
 }
-
-
-
-
-
-
-
-
-
-

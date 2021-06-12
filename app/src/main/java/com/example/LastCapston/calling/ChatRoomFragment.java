@@ -17,12 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.LastCapston.R;
-import com.example.LastCapston.data.UserSpeakState;
 import com.example.LastCapston.databinding.FragmentChatRoomBinding;
 import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
+import com.example.LastCapston.main.CloudStorage;
 
 import com.example.LastCapston.adapter.ChatMessageAdapter;
 import com.example.LastCapston.adapter.RecyclerViewAdapter;
@@ -58,7 +58,7 @@ public class ChatRoomFragment extends Fragment {
     private MQTTClient client = MQTTClient.getInstance();
     private MainViewModel viewModel = MainViewModel.getInstance();
     private CallingViewModel callingViewModel;
-
+    private CloudStorage storage = new CloudStorage(getActivity(), viewModel);
 
     //참여자 리스트
     private RecyclerView listView;
@@ -86,16 +86,19 @@ public class ChatRoomFragment extends Fragment {
 
 
 /* ----------------------------------    OnClickListener 함수        ---------------------------------------------------------------------------------*/
+        //참여자 목록 확인하는 버튼
+        binding.button.setOnClickListener(v -> {
+            Toast.makeText(getActivity(), viewModel.getUserList().toString(), Toast.LENGTH_SHORT).show();
+            client.publish(client.getTopic_text(), client.getUserName() + "&" +"good"+ "&" +"화남");
+        });
 
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"start");
                     binding.btnMic.setImageResource(R.drawable.mic_on);
                     callingViewModel.touchMic();
                     break;
                 case MotionEvent.ACTION_UP:
-                    client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"stop");
                     binding.btnMic.setImageResource(R.drawable.mic_off);
                     callingViewModel.touchMic();
                     break;
@@ -145,15 +148,6 @@ public class ChatRoomFragment extends Fragment {
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
 
-            }
-        });
-
-        viewModel.userSpeakState.observe(getViewLifecycleOwner(), new Observer<UserSpeakState>() {
-            @Override
-            public void onChanged(UserSpeakState userSpeakState) {
-                String speakUser =  userSpeakState.speakUser;
-                String state = userSpeakState.speakState;
-                adapter.notifyDataSetChanged(userSpeakState);
             }
         });
 

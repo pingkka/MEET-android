@@ -35,8 +35,7 @@ public class MainViewModel extends ViewModel {
 
     public MainViewModel() {
         /* 변수 초기화 */
-
-        ip.setValue("223.194.153.241"); // 지호
+        ip.setValue("113.198.82.77");
         port.setValue("1883");
 //        ip.setValue("113.198.82.77");
 //        port.setValue("1883");

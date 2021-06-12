@@ -10,12 +10,14 @@
         android:id="@+id/item_imageView"
         android:layout_width="80dp"
         android:layout_height="65dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_person_24"
-        tools:srcCompat="@drawable/ic_baseline_person_24" />
+        app:srcCompat="@drawable/user_off"
+        tools:srcCompat="@drawable/user_off" />
 
     <ImageView
         android:id="@+id/emotionImage"
