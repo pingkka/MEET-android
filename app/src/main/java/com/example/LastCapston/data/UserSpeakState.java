@@ -1,11 +1,11 @@
 package com.example.LastCapston.data;
 
 public class UserSpeakState {
-    public String speakUser;
+    public String speakName;
     public String speakState;
 
-    public UserSpeakState(String speakUser, String speakState){
-        this.speakUser = speakUser;
+    public UserSpeakState(String speakName, String speakState){
+        this.speakName = speakName;
         this.speakState = speakState;
     }
 }

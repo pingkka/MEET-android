@@ -1,7 +1,6 @@
 package com.example.LastCapston.main;
 
 
-import android.content.Context;
 import android.util.Log;
 
 import com.example.LastCapston.data.MQTTSettingData;
@@ -291,13 +290,9 @@ public class MQTTClient implements MqttCallbackExtended {
             String speakUserAndState = new String(message.getPayload(), "UTF-8");
             Log.i("MQTT", "speakUserAndState = " + speakUserAndState);
             String[] textArray = speakUserAndState.split("&");
-            for (int i = 0; i < textArray.length; i++) {
-                System.out.println(textArray[i]);
-            }
+
             String speakUser = textArray[0];
             String speakState = textArray[1];
-            Log.i("MQTT", "speakUser = " + speakUser);
-            Log.i("MQTT", "speakState = " + speakState);
             UserSpeakState userSpeakState = new UserSpeakState(speakUser, speakState);
             mainViewModel.setUserSpeakState(userSpeakState);
         }

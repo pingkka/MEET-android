@@ -1,5 +1,7 @@
 package com.example.LastCapston.main;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -31,14 +33,13 @@ public class MainViewModel extends ViewModel {
     public MutableLiveData<String> loginUser = new MutableLiveData<>();
     public MutableLiveData<String> logoutUser = new MutableLiveData<>();
     public MutableLiveData<SendText> currentText = new MutableLiveData<>();
-    public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>();
+    public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>(new UserSpeakState("",""));
 
     public MainViewModel() {
         /* 변수 초기화 */
-        ip.setValue("113.198.82.77");
+
+        ip.setValue("172.30.1.11"); // 지호
         port.setValue("1883");
-//        ip.setValue("113.198.82.77");
-//        port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
 
@@ -77,6 +78,20 @@ public class MainViewModel extends ViewModel {
         userList.add(user);
         userListData.postValue(userList);
     }
+    public void editUserSpeakState(String speakName, String speakState){
+        Log.i("MQTT", "speakUser = " + speakName);
+        Log.i("MQTT", "speakState = " + speakState);
+        for(int i = 0; i < userList.size(); i++){
+            String name = userList.get(i).userName;
+            if(name.equals(speakName) && speakState.equals("start")){
+                userList.get(i).speakState = "start";
+                userListData.postValue(userList);
+            }else if(name.equals(speakName) && speakState.equals("stop")){
+                userList.get(i).speakState = "stop";
+                userListData.postValue(userList);
+            }
+        }
+    }
 
     public void deleteUsersItem(String user) {
 
@@ -102,15 +117,13 @@ public class MainViewModel extends ViewModel {
     public SendText getCurrentText() {
         return currentText.getValue();
     }
-
     public String getLoginUser() {
         return loginUser.getValue();
     }
-
     public String getLogoutUser() {
         return logoutUser.getValue();
     }
-
+    public UserSpeakState getUserSpeakState(){ return userSpeakState.getValue(); }
 
 
     /* Setter */
@@ -127,9 +140,7 @@ public class MainViewModel extends ViewModel {
     public void setCurrentText(SendText text){
         currentText.postValue(text);
     }
-    public void setUserSpeakState(UserSpeakState userSpeakState){
-        this.userSpeakState.postValue(userSpeakState);
-    }
+    public void setUserSpeakState(UserSpeakState userSpeakState){ this.userSpeakState.postValue(userSpeakState); }
     public void setLogoutUser(String user){
         logoutUser.postValue(user);
     }

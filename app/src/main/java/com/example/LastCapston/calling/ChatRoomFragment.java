@@ -17,12 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.LastCapston.R;
+import com.example.LastCapston.data.UserSpeakState;
 import com.example.LastCapston.databinding.FragmentChatRoomBinding;
 import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
-import com.example.LastCapston.main.CloudStorage;
 
 import com.example.LastCapston.adapter.ChatMessageAdapter;
 import com.example.LastCapston.adapter.RecyclerViewAdapter;
@@ -58,11 +58,12 @@ public class ChatRoomFragment extends Fragment {
     private MQTTClient client = MQTTClient.getInstance();
     private MainViewModel viewModel = MainViewModel.getInstance();
     private CallingViewModel callingViewModel;
-    private CloudStorage storage = new CloudStorage(getActivity(), viewModel);
+
 
     //참여자 리스트
     private RecyclerView listView;
     private RecyclerViewAdapter adapter;
+    private LinearLayoutManager layoutManager;
 
     //채팅 리스트
     private ArrayList<MessageItem> dataList;
@@ -85,20 +86,17 @@ public class ChatRoomFragment extends Fragment {
         client.publish(client.settingData.getTopic() + "/login", client.settingData.getUserName());
 
 
-/* ----------------------------------    OnClickListener 함수        ---------------------------------------------------------------------------------*/
-        //참여자 목록 확인하는 버튼
-        binding.button.setOnClickListener(v -> {
-            Toast.makeText(getActivity(), viewModel.getUserList().toString(), Toast.LENGTH_SHORT).show();
-            client.publish(client.getTopic_text(), client.getUserName() + "&" +"good"+ "&" +"화남");
-        });
+        /* ----------------------------------    OnClickListener 함수        ---------------------------------------------------------------------------------*/
 
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"start");
                     binding.btnMic.setImageResource(R.drawable.mic_on);
                     callingViewModel.touchMic();
                     break;
                 case MotionEvent.ACTION_UP:
+                    client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"stop");
                     binding.btnMic.setImageResource(R.drawable.mic_off);
                     callingViewModel.touchMic();
                     break;
@@ -114,12 +112,12 @@ public class ChatRoomFragment extends Fragment {
             Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
         });
 
-/* -------------------------------------    observe 함수        ---------------------------------------------------------------------------------*/
+        /* -------------------------------------    observe 함수        ---------------------------------------------------------------------------------*/
         //참여자 목록 갱신
         viewModel.userListData.observe(getViewLifecycleOwner(), new Observer<ArrayList<UserItem>>() {
             @Override
             public void onChanged(ArrayList<UserItem> strings) {
-                    userListUpdate();
+                userListUpdate();
             }
         });
 
@@ -147,7 +145,15 @@ public class ChatRoomFragment extends Fragment {
                 dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null,timeString, Code.ViewType.CENTER_CONTENT));
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
+            }
+        });
 
+        viewModel.userSpeakState.observe(getViewLifecycleOwner(), new Observer<UserSpeakState>() {
+            @Override
+            public void onChanged(UserSpeakState userSpeakState) {
+                String speakUser =  userSpeakState.speakName;
+                String state = userSpeakState.speakState;
+                viewModel.editUserSpeakState(speakUser, state);
             }
         });
 
@@ -171,7 +177,7 @@ public class ChatRoomFragment extends Fragment {
     //참여자 목록 생성 함수
     public void userListInit(){
         listView = binding.userListView;
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
+        layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
         listView.setLayoutManager(layoutManager);
 
         adapter = new RecyclerViewAdapter(getActivity(), viewModel);
@@ -180,10 +186,12 @@ public class ChatRoomFragment extends Fragment {
         UserListDecoration decoration = new UserListDecoration();
         listView.addItemDecoration(decoration);
     }
+
+
     //참여자 목록 UPDATE함수
     private void userListUpdate(){
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
+        layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
         listView.setLayoutManager(layoutManager);
         adapter = new RecyclerViewAdapter(getActivity(), viewModel);
         listView.setAdapter(adapter);

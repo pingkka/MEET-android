@@ -61,9 +61,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         UserItem item = mainViewModel.userList.get(position);
         holder.textview.setText(item.userName);
-        holder.imageView.setImageResource(R.drawable.ic_baseline_person_24);
-        //holder.textview.setTag(item);
-        //holder.textview.setOnClickListener(onClickItem);
+        if(item.speakState.equals("start")){
+            holder.imageView.setImageResource(R.drawable.user_on);
+        }else{
+            holder.imageView.setImageResource(R.drawable.user_off);
+        }
+
+
     }
 
     @Override
@@ -71,11 +75,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mainViewModel.userList.size();
     }
 
-
-    public void notifyDataSetChanged(UserSpeakState userSpeakState) {
-        for(int i=0; 0 < mainViewModel.userList.size(); i++){
-//            horder.
-        }
-    }
 
 }
