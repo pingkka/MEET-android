@@ -92,6 +92,16 @@ public class MainViewModel extends ViewModel {
             }
         }
     }
+    public void updateUserListEmotion(String username, String image) {
+        for(int i = 0; i < userList.size(); i++) {
+            String name = userList.get(i).userName;
+            if (name.equals(username)) {
+                userList.get(i).userEmotionIcon = image;
+                userListData.postValue(userList);
+            }
+        }
+    }
+
 
     public void deleteUsersItem(String user) {
 

@@ -165,6 +165,7 @@ public class ChatRoomFragment extends Fragment {
                     String text = sendText.sendText;
                     String image = sendText.sendImage;
                     addText(sendUser, text, image);
+                    updateUserListEmotion(sendUser, image);
                 }
             }
         });
@@ -187,6 +188,12 @@ public class ChatRoomFragment extends Fragment {
         listView.addItemDecoration(decoration);
     }
 
+
+    //참여자 목록 UPDATE함수
+    private void updateUserListEmotion(String username, String image){
+        viewModel.updateUserListEmotion(username, image);
+
+    }
 
     //참여자 목록 UPDATE함수
     private void userListUpdate(){
