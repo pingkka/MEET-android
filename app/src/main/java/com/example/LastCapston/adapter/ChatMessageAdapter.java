@@ -1,6 +1,7 @@
 package com.example.LastCapston.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }else if(viewHolder instanceof LeftViewHolder){
             ((LeftViewHolder)viewHolder).textv_nicname.setText(myDataList.get(position).getName());
             ((LeftViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getContent());
+            ((LeftViewHolder)viewHolder).textv_msg.setTextColor(Color.parseColor("#000000"));
             ((LeftViewHolder)viewHolder).textv_time.setText(myDataList.get(position).getTime());
 
             if(myDataList.get(position).getImg().equals("joy")){
@@ -65,14 +67,21 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 ((LeftViewHolder)viewHolder).imgv.setImageResource(R.drawable.sad);
             }else if(myDataList.get(position).getImg().equals("surprise")){
                 ((LeftViewHolder)viewHolder).imgv.setImageResource(R.drawable.surprise);
-            }else{
+            }else if(myDataList.get(position).getImg().equals("none")){
                 ((LeftViewHolder)viewHolder).imgv.setImageResource(R.drawable.none);
+            }else {
+                if(myDataList.get(position).getImg().equals("error")) {
+                    ((LeftViewHolder)viewHolder).textv_msg.setTextColor(Color.parseColor("#b5b1b1"));
+                }
+                ((LeftViewHolder)viewHolder).imgv.setImageResource(R.drawable.error);
             }
 
 
         }else{
             ((RightViewHolder)viewHolder).textv_msg.setText(myDataList.get(position).getContent());
+            ((RightViewHolder)viewHolder).textv_msg.setTextColor(Color.parseColor("#000000"));
             ((RightViewHolder)viewHolder).textv_time.setText(myDataList.get(position).getTime());
+
             if(myDataList.get(position).getImg().equals("joy")){
                 ((RightViewHolder)viewHolder).imgv.setImageResource(R.drawable.joy);
             }else if(myDataList.get(position).getImg().equals("annoy")){
@@ -85,8 +94,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 ((RightViewHolder)viewHolder).imgv.setImageResource(R.drawable.sad);
             }else if(myDataList.get(position).getImg().equals("surprise")){
                 ((RightViewHolder)viewHolder).imgv.setImageResource(R.drawable.surprise);
-            }else{
+            }else if(myDataList.get(position).getImg().equals("none")){
                 ((RightViewHolder)viewHolder).imgv.setImageResource(R.drawable.none);
+            }else {
+                if(myDataList.get(position).getImg().equals("error")) {
+                    ((RightViewHolder)viewHolder).textv_msg.setTextColor(Color.parseColor("#b5b1b1"));
+                }
+                ((RightViewHolder)viewHolder).imgv.setImageResource(R.drawable.error);
             }
         }
 

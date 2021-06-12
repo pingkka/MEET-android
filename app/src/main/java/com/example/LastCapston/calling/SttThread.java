@@ -137,7 +137,7 @@ public class SttThread extends Thread {
                         }
                         else { // errorCalled
                             Log.i("Stt", "errorCalled");
-                            publishTextDataAndEmotionData("???", "none");
+                            publishTextDataAndEmotionData("<error>", "error");
                         }
 
                     } else {

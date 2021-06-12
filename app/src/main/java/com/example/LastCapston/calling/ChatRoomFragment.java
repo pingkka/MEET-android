@@ -1,12 +1,13 @@
 package com.example.LastCapston.calling;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,17 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.LastCapston.R;
-import com.example.LastCapston.data.UserSpeakState;
-import com.example.LastCapston.databinding.FragmentChatRoomBinding;
+import com.example.LastCapston.adapter.ChatMessageAdapter;
+import com.example.LastCapston.adapter.RecyclerViewAdapter;
 import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
-
-import com.example.LastCapston.adapter.ChatMessageAdapter;
-import com.example.LastCapston.adapter.RecyclerViewAdapter;
-
-
+import com.example.LastCapston.data.UserSpeakState;
+import com.example.LastCapston.databinding.FragmentChatRoomBinding;
 import com.example.LastCapston.main.MQTTClient;
 import com.example.LastCapston.main.MainViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,11 +36,11 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,10 +57,10 @@ public class ChatRoomFragment extends Fragment {
     private MainViewModel viewModel = MainViewModel.getInstance();
     private CallingViewModel callingViewModel;
 
-
     //참여자 리스트
     private RecyclerView listView;
     private RecyclerViewAdapter adapter;
+    private LinearLayoutManager layoutManager;
 
     //채팅 리스트
     private ArrayList<MessageItem> dataList;
@@ -76,6 +74,8 @@ public class ChatRoomFragment extends Fragment {
 
         binding = FragmentChatRoomBinding.inflate(inflater, container, false);
         callingViewModel = new ViewModelProvider(this).get(CallingViewModel.class);
+
+        binding.roomName.setText(callingViewModel.getTopic());
 
         //초기 참여자 목록 설정
         userListInit();
@@ -108,7 +108,23 @@ public class ChatRoomFragment extends Fragment {
 
         //나가기 버튼 리스너
         binding.exit.setOnClickListener(v -> {
-            Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+
+            dialog.setTitle("방 나가기")
+                    .setMessage("정말 나가시겠습니까?")
+                    .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                        }
+                    })
+                    .show();
         });
 
         /* -------------------------------------    observe 함수        ---------------------------------------------------------------------------------*/
@@ -144,7 +160,6 @@ public class ChatRoomFragment extends Fragment {
                 dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null,timeString, Code.ViewType.CENTER_CONTENT));
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
-
             }
         });
 
@@ -153,7 +168,7 @@ public class ChatRoomFragment extends Fragment {
             public void onChanged(UserSpeakState userSpeakState) {
                 String speakUser =  userSpeakState.speakUser;
                 String state = userSpeakState.speakState;
-                //adapter.notifyDataSetChanged(userSpeakState);
+                viewModel.editUserSpeakState(speakUser, state);
             }
         });
 
@@ -165,12 +180,12 @@ public class ChatRoomFragment extends Fragment {
                     String text = sendText.sendText;
                     String image = sendText.sendImage;
                     addText(sendUser, text, image);
+                    updateUserListEmotion(sendUser, image);
                 }
             }
         });
         return binding.getRoot();
     }
-
 
     /* --------------------------------------------   그 외 함수        ---------------------------------------------------------------------------------*/
 
@@ -186,10 +201,15 @@ public class ChatRoomFragment extends Fragment {
         UserListDecoration decoration = new UserListDecoration();
         listView.addItemDecoration(decoration);
     }
+
+    //참여자 목록 UPDATE함수
+    private void updateUserListEmotion(String username, String image){
+        viewModel.updateUserListEmotion(username, image);
+    }
+
     //참여자 목록 UPDATE함수
     private void userListUpdate(){
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
+        layoutManager = new LinearLayoutManager(getActivity(),  LinearLayoutManager.HORIZONTAL, false);
         listView.setLayoutManager(layoutManager);
         adapter = new RecyclerViewAdapter(getActivity(), viewModel);
         listView.setAdapter(adapter);
@@ -198,7 +218,7 @@ public class ChatRoomFragment extends Fragment {
         listView.addItemDecoration(decoration);
     }
 
-    // 채팅창recyclerView 생성 함수
+    //채팅창 recyclerView 생성 함수
     private void chatRecyclerInit(){
         dataList = new ArrayList();
         recyvlerv = binding.recyvlerv;
@@ -228,8 +248,6 @@ public class ChatRoomFragment extends Fragment {
         }
 
     }
-
-
 
     @Override
     public void onDestroyView() {
@@ -267,8 +285,8 @@ public class ChatRoomFragment extends Fragment {
         dataList.clear();
 
         client.getConnectOptions().setAutomaticReconnect(false);
+
         /* Audio 관련 처리 */
-        /* -------------------------- 추가 ------------------------- */
         /* EmotionThread interrupt */
         if (callingViewModel.getEmotionFlag()) {
             callingViewModel.getEmotionThread().setEmotionFlag(false);
@@ -280,18 +298,13 @@ public class ChatRoomFragment extends Fragment {
             callingViewModel.getSttThread().setSttFlag(false);
         }
         callingViewModel.getSttThread().interrupt();
-        /* -------------------------------------------------------- */
 
-        /* Audio 관련 처리 */
         /* RecordThread interrupt */
         if(callingViewModel.getRecordFlag()) {
             callingViewModel.getRecordThread().setRecordFlag(false);
         }
-
         callingViewModel.getRecordThread().stopRecording();
         callingViewModel.getRecordThread().interrupt();
-
-
 
         /* topic_audio unsubscribe */
         if(client.getClient().isConnected()) {
@@ -305,7 +318,21 @@ public class ChatRoomFragment extends Fragment {
         /* PlayThreadList의 모든 PlayThread interrupt 및 PlayThreadList 초기화*/
         //java.util.ConcurrentModificationException 원인 및 처리 방법
         //index가 실시간으로 변하기 때문에 발생하는 오류
-        for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();){
+        synchronized (client.getPlayThreadList()) {
+            for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();) {
+                PlayThread playThread = itr.next();
+                if(callingViewModel.getPlayFlag()) {
+                    playThread.setPlayFlag(false);
+                }
+
+                playThread.stopPlaying();
+                synchronized (playThread.getAudioQueue()) {
+                    playThread.getAudioQueue().clear();
+                }
+                playThread.interrupt();
+            }
+        }
+        /*for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();){
             PlayThread playThread = itr.next();
             if(callingViewModel.getPlayFlag()) {
                 playThread.setPlayFlag(false);
@@ -316,7 +343,7 @@ public class ChatRoomFragment extends Fragment {
                 playThread.getAudioQueue().clear();
             }
             playThread.interrupt();
-        }
+        }*/
 //        for(PlayThread playThread : client.getPlayThreadList()) {
 //            if(callingViewModel.getPlayFlag()) {
 //                playThread.setPlayFlag(false);
@@ -333,14 +360,11 @@ public class ChatRoomFragment extends Fragment {
 
         //실제 연결 끊음
 
-
-
         /* MQTTClient 연결 해제 */
         client.getParticipantsList().clear();
         client.disconnect();
         client.getConnectOptions().setAutomaticReconnect(false);
     }
-
 
     /* 로그아웃시 firebase에서 삭제해주는 함수 */
     public void databaseLogout(ArrayList<String> userList, String roomID, String user) throws Exception {
@@ -371,11 +395,8 @@ public class ChatRoomFragment extends Fragment {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Log.w(TAG, "아직 방에 사람 있음");
-
-
                 }
             });
         }
-
     }
 }

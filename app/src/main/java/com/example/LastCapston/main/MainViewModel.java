@@ -1,5 +1,7 @@
 package com.example.LastCapston.main;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -11,9 +13,6 @@ import com.example.LastCapston.data.UserSpeakState;
 import java.util.ArrayList;
 
 import lombok.Getter;
-
-import static android.media.CamcorderProfile.get;
-
 
 @Getter
 public class MainViewModel extends ViewModel {
@@ -35,11 +34,11 @@ public class MainViewModel extends ViewModel {
 
     public MainViewModel() {
         /* 변수 초기화 */
-        ip.setValue("113.198.82.77");
+//        ip.setValue("113.198.82.77"); // BUG
+        ip.setValue("172.30.1.34");
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
-
     }
 
     /* 싱글톤으로 객체 생성 */
@@ -53,7 +52,6 @@ public class MainViewModel extends ViewModel {
         settingData.setPort(port.getValue());
         settingData.setTopic(topic.getValue());
         settingData.setUserName(userName.getValue());
-
     }
 
     public void initMQTTSettingData() {
@@ -70,23 +68,49 @@ public class MainViewModel extends ViewModel {
         logoutUser = new MutableLiveData<>();
     }
 
-
     public void addUserItem(UserItem user){
         userList.add(user);
         userListData.postValue(userList);
     }
 
-    public void deleteUsersItem(String user) {
+    public void editUserSpeakState(String speakName, String speakState){
+        Log.i("MQTT", "speakUser = " + speakName);
+        Log.i("MQTT", "speakState = " + speakState);
 
         for(int i = 0; i < userList.size(); i++){
             String name = userList.get(i).userName;
+
+            if(name.equals(speakName) && speakState.equals("start")){
+                userList.get(i).speakState = "start";
+                userListData.postValue(userList);
+            }else if(name.equals(speakName) && speakState.equals("stop")){
+                userList.get(i).speakState = "stop";
+                userListData.postValue(userList);
+            }
+        }
+    }
+
+    public void updateUserListEmotion(String username, String image) {
+        for(int i = 0; i < userList.size(); i++) {
+            String name = userList.get(i).userName;
+
+            if (name.equals(username)) {
+                userList.get(i).userEmotionIcon = image;
+                userListData.postValue(userList);
+            }
+        }
+    }
+
+    public void deleteUsersItem(String user) {
+        for(int i = 0; i < userList.size(); i++){
+            String name = userList.get(i).userName;
+
             if(name.equals(user)){
                 userList.remove(i);
                 userListData.postValue(userList);
             }
         }
     }
-
 
     /* Getter */
     public ArrayList<String> getUserList() {
@@ -109,12 +133,13 @@ public class MainViewModel extends ViewModel {
         return logoutUser.getValue();
     }
 
-
+    public UserSpeakState getUserSpeakState() { return userSpeakState.getValue(); }
 
     /* Setter */
     public void setLoginUser(String user){
         loginUser.postValue(user);
     }
+
     public void setTopic(String topic) {
         this.topic.setValue(topic);
     }
@@ -122,14 +147,16 @@ public class MainViewModel extends ViewModel {
     public void setName(String name) {
         this.userName.setValue(name);
     }
+
     public void setCurrentText(SendText text){
         currentText.postValue(text);
     }
+
     public void setUserSpeakState(UserSpeakState userSpeakState){
         this.userSpeakState.postValue(userSpeakState);
     }
+
     public void setLogoutUser(String user){
         logoutUser.postValue(user);
     }
-
 }
