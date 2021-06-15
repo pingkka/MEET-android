@@ -1,6 +1,5 @@
 package com.example.LastCapston.data;
 
-
 public class UserItem {
 
     public String userName;
@@ -12,6 +11,5 @@ public class UserItem {
         this.speakState = "stop";
         this.userEmotionIcon = "";
     }
-
 
 }

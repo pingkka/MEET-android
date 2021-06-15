@@ -9,24 +9,18 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.example.LastCapston.R;
 import com.example.LastCapston.data.UserItem;
-import com.example.LastCapston.data.UserSpeakState;
 import com.example.LastCapston.main.MainViewModel;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-
-
     private MainViewModel mainViewModel;
     private Context context;
-
 
     public RecyclerViewAdapter(Context context, MainViewModel mainViewModel) {
         this.context = context;
         this.mainViewModel = mainViewModel;
-
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -39,7 +33,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             textview = itemView.findViewById(R.id.item_textview);
             imageView = itemView.findViewById(R.id.item_imageView);
             emotionImageView = itemView.findViewById(R.id.emotionImage);
-
         }
     }
 
@@ -80,15 +73,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }else{
             holder.emotionImageView.setImageResource(R.drawable.none);
         }
-
-
-
     }
 
     @Override
     public int getItemCount() {
         return mainViewModel.userList.size();
     }
-
-
 }
