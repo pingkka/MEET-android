@@ -119,9 +119,30 @@ public class ChatRoomFragment extends Fragment {
                         }
                     })
                     .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                        @SneakyThrows
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                            String roomID = client.settingData.getTopic();
+                            String user = client.settingData.getUserName();
+                            System.out.println(viewModel.getUserList().toString());
+                            client.publish(roomID+"/logout", user);
+                            ArrayList<String> userList = viewModel.getUserList();
+                            //logout();
+                            dataList.clear();
+                            /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+                            databaseLogout(userList, roomID, user);
+
+                            /* MQTTClient 연결 해제 */
+
+                            client.getParticipantsList().clear();
+                            client.getConnectOptions().setAutomaticReconnect(false);
+
+                            /* view모델 초기화 */
+                            //MQTTSettingData 초기화
+                            viewModel.initMQTTSettingData();
+                            //mainViewmodel 초기화
+                            viewModel.mainViewMoedlInit();
                         }
                     })
                     .show();
@@ -259,25 +280,7 @@ public class ChatRoomFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        String roomID = client.settingData.getTopic();
-        String user = client.settingData.getUserName();
-        System.out.println(viewModel.getUserList().toString());
-        client.publish(roomID+"/logout", user);
-        ArrayList<String> userList = viewModel.getUserList();
-        logout();
-        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-        databaseLogout(userList, roomID, user);
 
-        /* MQTTClient 연결 해제 */
-
-        client.getParticipantsList().clear();
-        client.getConnectOptions().setAutomaticReconnect(false);
-
-        /* view모델 초기화 */
-        //MQTTSettingData 초기화
-        viewModel.initMQTTSettingData();
-        //mainViewmodel 초기화
-        viewModel.mainViewMoedlInit();
     }
 
     private void logout(){
