@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -25,6 +26,7 @@ import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
 import com.example.LastCapston.data.UserSpeakState;
+
 import com.example.LastCapston.databinding.FragmentChatRoomBinding;
 import com.example.LastCapston.main.MQTTClient;
 import com.example.LastCapston.main.MainViewModel;
@@ -90,6 +92,17 @@ public class ChatRoomFragment extends Fragment {
         binding.btnMic.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+
+//                    synchronized (client.getPlayThreadList()) {
+//                        for(Iterator<PlayThread> itr = client.getPlayThreadList().iterator(); itr.hasNext();) {
+//                            PlayThread playThread = itr.next();
+//                            Toast.makeText(getActivity(), playThread.getUserName(), Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+
+
+
+
                     client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"start");
                     binding.btnMic.setImageResource(R.drawable.mic_on);
                     callingViewModel.touchMic();
@@ -119,9 +132,34 @@ public class ChatRoomFragment extends Fragment {
                         }
                     })
                     .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                        @SneakyThrows
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+
+                            String roomID = client.settingData.getTopic();
+                            String user = client.settingData.getUserName();
+                            System.out.println(viewModel.getUserList().toString());
+                            client.publish(roomID+"/logout", user);
+                            ArrayList<String> userList = viewModel.getUserList();
+                            logout();
+
+                            /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+                            databaseLogout(userList, roomID, user);
+
+                            /* MQTTClient 연결 해제 */
+
+                            client.getParticipantsList().clear();
+                            client.getConnectOptions().setAutomaticReconnect(false);
+
+                            /* view모델 초기화 */
+                            //MQTTSettingData 초기화
+                            viewModel.initMQTTSettingData();
+                            //mainViewmodel 초기화
+                            viewModel.mainViewMoedlInit();
+                            observeTextFlag = false;
                             Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+
+
                         }
                     })
                     .show();
@@ -153,13 +191,15 @@ public class ChatRoomFragment extends Fragment {
         viewModel.logoutUser.observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                String user = viewModel.getLogoutUser();
-                SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
-                Date time = new Date();
-                String timeString = format.format(time);
-                dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null,timeString, Code.ViewType.CENTER_CONTENT));
-                recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
-                recyvlerv.scrollToPosition(dataList.size()-1);
+                if(observeTextFlag) {
+                    String user = viewModel.getLogoutUser();
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    Date time = new Date();
+                    String timeString = format.format(time);
+                    dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+                    recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
+                    recyvlerv.scrollToPosition(dataList.size() - 1);
+                }
             }
         });
 
@@ -252,32 +292,16 @@ public class ChatRoomFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        //Toast.makeText(getActivity(), "onDestroyView", Toast.LENGTH_SHORT).show();
+
     }
 
     @SneakyThrows
     @Override
     public void onDestroy() {
         super.onDestroy();
-        String roomID = client.settingData.getTopic();
-        String user = client.settingData.getUserName();
-        System.out.println(viewModel.getUserList().toString());
-        client.publish(roomID+"/logout", user);
-        ArrayList<String> userList = viewModel.getUserList();
-        logout();
-        /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-        databaseLogout(userList, roomID, user);
-
-        /* MQTTClient 연결 해제 */
-
-        client.getParticipantsList().clear();
-        client.getConnectOptions().setAutomaticReconnect(false);
-
-        /* view모델 초기화 */
-        //MQTTSettingData 초기화
-        viewModel.initMQTTSettingData();
-        //mainViewmodel 초기화
-        viewModel.mainViewMoedlInit();
+        //Toast.makeText(getActivity(), "onDestroy", Toast.LENGTH_SHORT).show();
+        binding = null;
     }
 
     private void logout(){
@@ -337,7 +361,6 @@ public class ChatRoomFragment extends Fragment {
             if(callingViewModel.getPlayFlag()) {
                 playThread.setPlayFlag(false);
             }
-
             playThread.stopPlaying();
             synchronized (playThread.getAudioQueue()) {
                 playThread.getAudioQueue().clear();
@@ -362,7 +385,7 @@ public class ChatRoomFragment extends Fragment {
 
         /* MQTTClient 연결 해제 */
         client.getParticipantsList().clear();
-        client.disconnect();
+        client.disconnect1();
         client.getConnectOptions().setAutomaticReconnect(false);
     }
 

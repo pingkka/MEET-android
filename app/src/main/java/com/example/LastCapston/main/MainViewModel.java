@@ -35,7 +35,7 @@ public class MainViewModel extends ViewModel {
     public MainViewModel() {
         /* 변수 초기화 */
 //        ip.setValue("113.198.82.77"); // BUG
-        ip.setValue("172.30.1.34");
+        ip.setValue("223.194.153.241");
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
@@ -64,6 +64,7 @@ public class MainViewModel extends ViewModel {
         /* 변수 초기화 */
         userList = new ArrayList<UserItem>();
         userListData = new MutableLiveData<ArrayList<UserItem>>();
+        currentText = new MutableLiveData<>();
         loginUser = new MutableLiveData<>();
         logoutUser = new MutableLiveData<>();
     }
