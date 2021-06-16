@@ -120,7 +120,6 @@ public class SttThread extends Thread {
                                 JSONObject json = new JSONObject(result_json_string);
                                 String sttResultMsg = json.getString("value");
 
-
                                 Log.i("Stt", sttResultMsg);
                                 Log.i("Stt", "sttResultMsg Size is " + sttResultMsg.length());
                                 if(sttResultMsg.length() > 0) {
@@ -138,7 +137,7 @@ public class SttThread extends Thread {
                         }
                         else { // errorCalled
                             Log.i("Stt", "errorCalled");
-
+                            publishTextDataAndEmotionData("<error>", "error");
                         }
 
                     } else {
@@ -156,5 +155,8 @@ public class SttThread extends Thread {
         }
     }
 
+    private void publishTextDataAndEmotionData(String text, String emotion) {
+        mqttClient.publish(mqttClient.getTopic_text(), mqttClient.getUserName() + "&" +text+ "&" +emotion);
+    }
 
 }

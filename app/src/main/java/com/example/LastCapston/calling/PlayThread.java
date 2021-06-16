@@ -65,10 +65,25 @@ public class PlayThread extends Thread {
     }
 
     /* AudioTrack 리소스 해제 */
+    //audiostop()함수 오류 예외처리 https://tristan91.tistory.com/112
     public void stopPlaying() {
-        audioTrack.stop();
-        audioTrack.release();
+        if (audioTrack != null && audioTrack.getState() != AudioTrack.STATE_UNINITIALIZED) {
+            if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_STOPPED) {
+                try {
+                    audioTrack.stop(); // 오디오 재생 종료
+
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                }
+                audioTrack.release(); // 오디오 트랙이 잡은 모든 리소스를 해제시킨다.
+            }
+        }
+//        audioTrack.stop();
+//        audioTrack.release();
         audioTrack = null;
         Log.i("Audio", "Stop Playing");
     }
+
+
+
 }
