@@ -137,6 +137,16 @@
             app:layout_constraintBottom_toBottomOf="@+id/enterOK"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <CheckBox
+            android:id="@+id/autoSaveBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대화 내용 자동 저장"
+            app:layout_constraintBottom_toTopOf="@+id/ereateExit"
+            app:layout_constraintEnd_toEndOf="@+id/userID"
+            app:layout_constraintTop_toBottomOf="@+id/userID"
+            app:layout_constraintVertical_bias="0.0" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

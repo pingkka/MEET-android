@@ -26,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 @Getter
 @Setter
-public class SttThread extends Thread {
+public class    SttThread extends Thread {
 
     /* 카카오 음성 REST API Setting 관련 변수 */
     private String BASE_URL_KAKAO_API = "https://kakaoi-newtone-openapi.kakao.com/";
@@ -47,6 +47,10 @@ public class SttThread extends Thread {
     private EmotionThread emotionThread;
 
     private MQTTClient mqttClient = MQTTClient.getInstance();
+
+    /* 성능 측정 변수 */
+    private long kakaoStartTime;
+    private long kakaoEndTime;
 
     @Override
     public void run() {
@@ -96,7 +100,12 @@ public class SttThread extends Thread {
 
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/octet-stream"), audio);
 
+            /* kakaoAPI 응답 시간 측정 */
+            /*setKakaoStartTime(SystemClock.elapsedRealtime());
+            Log.d("Performance", "kakaoStartTime:" + getKakaoStartTime());*/
+
             Call<ResponseBody> getCall = retrofitService.get_post_pcm(transferEncoding, contentType, authorization, requestBody);
+
             getCall.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -106,6 +115,12 @@ public class SttThread extends Thread {
                         try {
                             result = body.string();
                             Log.i("Stt", result);
+
+                            /* kakaoAPI 응답 시간 측정 */
+                            /*setKakaoEndTime(SystemClock.elapsedRealtime());
+                            Log.d("Performance", "kakaoEndTime:" + getKakaoEndTime());
+                            Log.d("Performance", "kakaoDelayTime:" + (getKakaoEndTime() - getKakaoStartTime()));
+                            Log.d("Performance", "---------------------------");*/
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -122,6 +137,11 @@ public class SttThread extends Thread {
 
                                 Log.i("Stt", sttResultMsg);
                                 Log.i("Stt", "sttResultMsg Size is " + sttResultMsg.length());
+
+                                /* STT 성능 측정 */
+                                /*Log.d("Performance", sttResultMsg);
+                                Log.d("Performance", "---------------------------");*/
+
                                 if(sttResultMsg.length() > 0) {
                                     emotionFlag = true;
                                     emotionThread.setSttResultMsg(sttResultMsg);

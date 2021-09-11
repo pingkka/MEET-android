@@ -1,5 +1,6 @@
 package com.example.LastCapston.calling;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -38,6 +40,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,6 +75,13 @@ public class ChatRoomFragment extends Fragment {
 
     private boolean observeTextFlag = false;
 
+    /* 대화 내용 저장 관련 변수 */
+    private Boolean autoSaveFlag = false;
+    private File msgDir;
+    private File msgFile;
+    private String msgFileName;
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -75,6 +89,18 @@ public class ChatRoomFragment extends Fragment {
         callingViewModel = new ViewModelProvider(this).get(CallingViewModel.class);
 
         binding.roomName.setText(callingViewModel.getTopic());
+
+        autoSaveFlag = viewModel.getAutoSaveFlag();
+
+        String msgDirPath = getContext().getExternalFilesDir(null).toString() + "/Conversation";
+        msgDir = new File(msgDirPath);
+        if(!msgDir.exists()) {
+            msgDir.mkdir();
+            Log.d("Conversation", "msgDir 생성 : " + msgDirPath);
+        }
+
+        // msgFileName 설정
+        msgFileInit();
 
         //초기 참여자 목록 설정
         userListInit();
@@ -99,6 +125,9 @@ public class ChatRoomFragment extends Fragment {
 
 
 
+                    /* 오디오 데이터 전달 속도 측정 */
+                    /*client.setAudioStartTime(SystemClock.elapsedRealtime());
+                    Log.d("Performance", "audioStartTime:"+client.getAudioStartTime());*/
 
                     client.publish(client.getTopic_speakMark(), client.getUserName() + "&" +"start");
                     binding.btnMic.setImageResource(R.drawable.mic_on);
@@ -116,50 +145,71 @@ public class ChatRoomFragment extends Fragment {
             return false;
         });
 
+        /* 대화 내용 저장 */
+        binding.save.setOnClickListener(v -> {
+            conversationSave(0);
+        });
+
         //나가기 버튼 리스너
         binding.exit.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
-            dialog.setTitle("방 나가기")
-                    .setMessage("정말 나가시겠습니까?")
-                    .setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+            View layout = inflater.inflate(R.layout.dialog_exit, null);
+            dialog.setView(layout);
 
-                        }
-                    })
-                    .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
-                        @SneakyThrows
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+            CheckBox cbSave = (CheckBox) layout.findViewById(R.id.cbSave);
+            if(autoSaveFlag) {
+                cbSave.setChecked(true);
+            }
+            cbSave.setOnClickListener(new CheckBox.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(cbSave.isChecked()) {
+                        autoSaveFlag = true;
+                    } else {
+                        autoSaveFlag = false;
+                    }
+                }
+            });
 
-                            String roomID = client.settingData.getTopic();
-                            String user = client.settingData.getUserName();
-                            System.out.println(viewModel.getUserList().toString());
-                            client.publish(roomID+"/logout", user);
-                            ArrayList<String> userList = viewModel.getUserList();
-                            logout();
+            dialog.setNegativeButton("취소", null);
 
-                            /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-                            databaseLogout(userList, roomID, user);
+            dialog.setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                @SneakyThrows
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    /* 대화 내용 저장 */
+                    if (autoSaveFlag) {
+//                        Log.d("Conversation", "대화 내용 저장");
+                        conversationSave(0);
+                    }
 
-                            /* MQTTClient 연결 해제 */
+                    String roomID = client.settingData.getTopic();
+                    String user = client.settingData.getUserName();
+                    System.out.println(viewModel.getUserList().toString());
+                    client.publish(roomID+"/logout", user);
+                    ArrayList<String> userList = viewModel.getUserList();
+                    logout();
 
-                            client.getParticipantsList().clear();
-                            client.getConnectOptions().setAutomaticReconnect(false);
+                    /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+                    databaseLogout(userList, roomID, user);
 
-                            /* view모델 초기화 */
-                            //MQTTSettingData 초기화
-                            viewModel.initMQTTSettingData();
-                            //mainViewmodel 초기화
-                            viewModel.mainViewMoedlInit();
-                            observeTextFlag = false;
-                            Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                    /* MQTTClient 연결 해제 */
 
+                    client.getParticipantsList().clear();
+                    client.getConnectOptions().setAutomaticReconnect(false);
 
-                        }
-                    })
-                    .show();
+                    /* view모델 초기화 */
+                    //MQTTSettingData 초기화
+                    viewModel.initMQTTSettingData();
+                    //mainViewmodel 초기화
+                    viewModel.mainViewMoedlInit();
+                    observeTextFlag = false;
+                    Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                }
+            });
+
+            dialog.create().show();
         });
 
         /* -------------------------------------    observe 함수        ---------------------------------------------------------------------------------*/
@@ -182,6 +232,10 @@ public class ChatRoomFragment extends Fragment {
                 dataList.add(new MessageItem(user + "님이 입장했습니다.", null,null, timeString, Code.ViewType.CENTER_CONTENT));
                 recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                 recyvlerv.scrollToPosition(dataList.size()-1);
+
+                if(autoSaveFlag) {
+                    conversationSave(1);
+                }
             }
         });
 
@@ -196,6 +250,10 @@ public class ChatRoomFragment extends Fragment {
                     dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
                     recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
                     recyvlerv.scrollToPosition(dataList.size() - 1);
+
+                    if(autoSaveFlag) {
+                        conversationSave(1);
+                    }
                 }
             }
         });
@@ -221,6 +279,7 @@ public class ChatRoomFragment extends Fragment {
                 }
             }
         });
+
         return binding.getRoot();
     }
 
@@ -264,10 +323,8 @@ public class ChatRoomFragment extends Fragment {
         recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
     }
 
-
     // 채팅창 text 추가 함수
     public void addText(String user, String text, String image){
-
         if(client.getUserName().equals(user)){
             SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
             Date time = new Date();
@@ -284,6 +341,72 @@ public class ChatRoomFragment extends Fragment {
             recyvlerv.scrollToPosition(dataList.size()-1);
         }
 
+        if(autoSaveFlag) {
+            conversationSave(1);
+        }
+    }
+
+    // 대화내용을 저장할 파일명 지정 함수
+    public void msgFileInit() {
+        /* 파일 이름 : 날짜시간_방이름.txt 또는 방이름_날짜시간.txt */
+        SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMddHHmm");
+        Date currentTime = new Date();
+        String date = dateFormat.format(currentTime);
+
+        msgFileName = "/" + callingViewModel.getTopic() + "_" + date + ".txt";
+    }
+
+    /* 대화 내용 저장 함수 (saveFlag 0 : 전체 내용 저장, 1: 채팅 하나씩 저장*/
+    public void conversationSave(int saveFlag) {
+        try {
+            FileWriter fileWriter;
+            BufferedWriter bufferedWriter;
+
+            msgFile = new File(msgDir + msgFileName);
+            if(!msgFile.exists()) {
+                msgFile.createNewFile();
+            }
+
+//            Log.d("Conversation", "msgFilename : " + msgFileName + "생성");
+
+            /* 파일에 대화 내용 쓰기 */
+            if(saveFlag == 0) {
+                fileWriter = new FileWriter(msgFile, false);
+                bufferedWriter = new BufferedWriter(fileWriter);
+
+                for (MessageItem msgItem : dataList) {
+                    // [보낸사람] [시간] [감정] 대화 내용
+                    bufferedWriter.append("[" + msgItem.getName() + "] ");
+                    bufferedWriter.append("[" + msgItem.getTime() + "] ");
+                    bufferedWriter.append("[" + msgItem.getImg() + "] ");
+                    bufferedWriter.append(msgItem.getContent());
+                    bufferedWriter.newLine();
+
+//                    Log.d("Conversation", "msg0 : " + "[" + msgItem.getName() + "] " + "[" + msgItem.getTime() + "] " + "[" + msgItem.getImg() + "] " + msgItem.getContent());
+                }
+            }
+            else {
+                fileWriter = new FileWriter(msgFile, true);
+                bufferedWriter = new BufferedWriter(fileWriter);
+
+                MessageItem msgItem = dataList.get(dataList.size()-1);
+                // [보낸사람] [시간] [감정] 대화 내용
+                bufferedWriter.append("[" + msgItem.getName() + "] ");
+                bufferedWriter.append("[" + msgItem.getTime() + "] ");
+                bufferedWriter.append("[" + msgItem.getImg() + "] ");
+                bufferedWriter.append(msgItem.getContent());
+                bufferedWriter.newLine();
+
+//                Log.d("Conversation", "msg1 : " + "[" + msgItem.getName() + "] " + "[" + msgItem.getTime() + "] " + "[" + msgItem.getImg() + "] " + msgItem.getContent());
+            }
+
+            bufferedWriter.close();
+            fileWriter.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

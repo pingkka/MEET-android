@@ -13,8 +13,10 @@ import com.example.LastCapston.data.UserSpeakState;
 import java.util.ArrayList;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class MainViewModel extends ViewModel {
 
     private static MainViewModel instance = new MainViewModel();
@@ -32,10 +34,11 @@ public class MainViewModel extends ViewModel {
     public MutableLiveData<SendText> currentText = new MutableLiveData<>();
     public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>();
 
+    private Boolean autoSaveFlag = false;
+
     public MainViewModel() {
         /* 변수 초기화 */
-//        ip.setValue("113.198.82.77"); // BUG
-        ip.setValue("223.194.132.139");
+        ip.setValue("192.168.123.107"); // 경진
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");

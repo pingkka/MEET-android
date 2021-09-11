@@ -43,6 +43,13 @@ public class CreateRoomFragment extends Fragment{
 
         /* 버튼클릭시 viewModel로 id정보를 넘겨주고 조건이 맞으면 방 생성 */
         binding.createBTN.setOnClickListener(v -> {
+            if(binding.autoSaveBtn.isChecked()) {
+                viewModel.setAutoSaveFlag(true);
+            }
+            else {
+                viewModel.setAutoSaveFlag(false);
+            }
+
             checkRoomBeforeCreate(binding.roomID.getText().toString(), binding.roomPW.getText().toString(), binding.userID.getText().toString());
         });
 

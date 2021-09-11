@@ -1,6 +1,7 @@
 package com.example.LastCapston.main;
 
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.example.LastCapston.calling.CallingViewModel;
@@ -71,6 +72,10 @@ public class MQTTClient implements MqttCallbackExtended {
 //    private String beforeLoginUser;
 //    private String beforeLogoutUser;
     //private Context context;
+
+    /* 성능 측정 변수 */
+    private long audioStartTime;
+    private long audioEndTime;
 
     public static MQTTClient getInstance() {
         if(instance == null) {
@@ -252,6 +257,12 @@ public class MQTTClient implements MqttCallbackExtended {
 
             byte[] nameData = Arrays.copyOfRange(messageData, 0, messageData.length - 80000);
             String sender = new String(nameData);
+
+            /* 오디오 데이터 전달 속도 측정 */
+            /*audioEndTime = SystemClock.elapsedRealtime();
+            Log.d("Performance", "audioEndTime:"+ audioEndTime);
+            Log.d("Performance", "audioDelayTime : " + (audioEndTime - audioStartTime));
+            Log.d("Performance", "---------------------------");*/
 
             if (sender.equals(userName)) return;
             byte[] audioData = Arrays.copyOfRange(messageData, nameData.length, messageData.length);
