@@ -53,7 +53,7 @@ public class MainViewModel extends ViewModel {
     public MainViewModel() {
         /* 변수 초기화 */
 //        ip.setValue("113.198.82.77"); // BUG
-        ip.setValue("223.194.155.72");
+        ip.setValue("192.168.0.17");
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");

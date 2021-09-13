@@ -326,7 +326,7 @@ public class MQTTClient implements MqttCallbackExtended {
                     mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.CENTER_CONTENT));
                 } else if (getUserName().equals(sendTextUser)) {
 
-                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
 
                 } else {
 
@@ -341,7 +341,7 @@ public class MQTTClient implements MqttCallbackExtended {
                     mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.CENTER_CONTENT));
                 } else if (getUserName().equals(sendTextUser)) {
 
-                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
 
                 } else {
 

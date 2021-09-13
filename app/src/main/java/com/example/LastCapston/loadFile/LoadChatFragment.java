@@ -19,6 +19,7 @@ import com.example.LastCapston.adapter.ChatMessageAdapter;
 import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.databinding.FragmentLoadChatBinding;
+import com.example.LastCapston.main.MainViewModel;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
 public class LoadChatFragment extends Fragment {
 
     private FragmentLoadChatBinding binding = null;
+    private MainViewModel viewModel = MainViewModel.getInstance();
 
     //채팅 리스트
     private ArrayList<MessageItem> dataList;
@@ -77,8 +79,13 @@ public class LoadChatFragment extends Fragment {
 
         List<String>fileNameList = new ArrayList<>();
 
-        for(int i=0; i<files.length; i++) {
-            fileNameList.add(files[i].getName());
+        try{
+            for(int i=0; i<files.length; i++) {
+                fileNameList.add(files[i].getName());
+            }
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
 
         return fileNameList;
@@ -164,17 +171,16 @@ public class LoadChatFragment extends Fragment {
 //                Log.d("Conversation", "time : " + time);
 //                Log.d("Conversation", "img : " + img);
 
-                int viewType;
+                int viewType = 0;
                 if(name.equals("null")) {
                     if(img.equals("")) {
                         viewType = Code.ViewType.CENTER_CONTENT;
                         img = null;
                     }
-                    else {
-                        viewType = Code.ViewType.RIGHT_CONTENT;
-                    }
-
                     name = null;
+                }
+                else if(viewModel.getUserName().equals(name)) {
+                    viewType = Code.ViewType.RIGHT_CONTENT;
                 }
                 else {
                     viewType = Code.ViewType.LEFT_CONTENT;

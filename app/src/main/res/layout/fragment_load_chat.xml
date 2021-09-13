@@ -36,7 +36,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/exit"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="?android:attr/actionModeFindDrawable" />
+            app:srcCompat="?android:attr/actionModeFindDrawable"
+            app:tint="@color/white" />
 
         <ImageButton
             android:id="@+id/exit"

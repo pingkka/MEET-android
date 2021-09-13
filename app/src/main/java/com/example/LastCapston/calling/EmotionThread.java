@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 import lombok.Getter;
@@ -29,7 +31,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Setter
 public class EmotionThread extends Thread {
 
-    private String BASE_URL_EMOTION_API = "http://222.232.35.162:12315/api/";
+    private String BASE_URL_EMOTION_API = "http://192.168.0.15:8080/api/";
 
     private RetrofitService retrofitService;
     private Boolean emotionFlag = false;
@@ -129,10 +131,10 @@ public class EmotionThread extends Thread {
         });
     }
 
-    private void publishEmotionData(String emotion) {
-        mqttClient.publish(mqttClient.getTopic_emotion(), emotion);
-    }
     private void publishTextDataAndEmotionData(String text, String emotion) {
-        mqttClient.publish(mqttClient.getTopic_text(), mqttClient.getUserName() + "&" +text+ "&" +emotion);
+        SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+        Date time = new Date();
+        String timeString = format.format(time);
+        mqttClient.publish(mqttClient.getTopic_text(), mqttClient.getUserName() + "&" +text+ "&" +emotion + "&" +timeString+ "&" + "100" + "&" + "all");
     }
 }
