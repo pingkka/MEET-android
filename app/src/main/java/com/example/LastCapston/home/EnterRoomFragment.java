@@ -45,6 +45,12 @@ public class EnterRoomFragment extends Fragment {
 
         /* 버튼클릭시 viewModel로 id정보를 넘겨주고 조건이 맞으면 방 입장 */
         binding.enterOK.setOnClickListener(v -> {
+            if(binding.autoSaveBtn.isChecked()) {
+                viewModel.setAutoSaveFlag(true);
+            }
+            else {
+                viewModel.setAutoSaveFlag(false);
+            }
 
             checkRoomBeforeEnter(binding.roomID.getText().toString(), binding.roomPW.getText().toString(), binding.userID.getText().toString());
         });

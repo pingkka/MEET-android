@@ -47,6 +47,13 @@ public class HomeFragment extends Fragment {
                     .navigate(R.id.action_homeFragment_to_enterRoomFragment);
         });
 
+        binding.loadChatBTN.setOnClickListener(v -> {
+            // 파일 로드
+            Navigation.findNavController(binding.getRoot())
+                    .navigate(R.id.action_homeFragment_to_loadChatFragment);
+        });
+
+
         return binding.getRoot();
     }
 

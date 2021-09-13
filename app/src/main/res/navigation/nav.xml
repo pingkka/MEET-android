@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_homeFragment_to_enterRoomFragment"
             app:destination="@id/enterRoomFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_loadChatFragment"
+            app:destination="@id/loadChatFragment" />
     </fragment>
     <fragment
         android:id="@+id/createRoomFragment"
@@ -45,5 +48,15 @@
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/loadChatFragment"
+        android:name="com.example.LastCapston.loadFile.LoadChatFragment"
+        android:label="LoadChatFragment" >
+        <action
+            android:id="@+id/action_loadChatFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 </navigation>

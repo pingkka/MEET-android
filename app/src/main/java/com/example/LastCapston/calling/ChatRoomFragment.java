@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -38,6 +39,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,6 +70,11 @@ public class ChatRoomFragment extends Fragment {
 
     private boolean observeTextFlag = false;
 
+    private Boolean autoSaveFlag = false;
+    private File msgDir;
+    private File msgFile;
+    private String msgFileName;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -75,6 +82,20 @@ public class ChatRoomFragment extends Fragment {
         callingViewModel = new ViewModelProvider(this).get(CallingViewModel.class);
 
         binding.roomName.setText(callingViewModel.getTopic());
+
+        autoSaveFlag = viewModel.getAutoSaveFlag();
+
+        String msgDirPath = getContext().getExternalFilesDir(null).toString() + "/Conversation";
+        msgDir = new File(msgDirPath);
+        if(!msgDir.exists()) {
+            msgDir.mkdir();
+            Log.d("Conversation", "msgDir 생성 : " + msgDirPath);
+        }
+
+        viewModel.setMsgDir(msgDir);
+
+        // msgFileName 설정
+        viewModel.msgFileInit();
 
         //초기 참여자 목록 설정
         userListInit();
@@ -116,50 +137,71 @@ public class ChatRoomFragment extends Fragment {
             return false;
         });
 
+        /* 대화 내용 저장 */
+        binding.save.setOnClickListener(v -> {
+            viewModel.conversationSave(0);
+        });
+
         //나가기 버튼 리스너
         binding.exit.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
-            dialog.setTitle("방 나가기")
-                    .setMessage("정말 나가시겠습니까?")
-                    .setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+            View layout = inflater.inflate(R.layout.dialog_exit, null);
+            dialog.setView(layout);
 
-                        }
-                    })
-                    .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
-                        @SneakyThrows
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+            CheckBox cbSave = (CheckBox) layout.findViewById(R.id.cbSave);
+            if(autoSaveFlag) {
+                cbSave.setChecked(true);
+            }
+            cbSave.setOnClickListener(new CheckBox.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(cbSave.isChecked()) {
+                        autoSaveFlag = true;
+                    } else {
+                        autoSaveFlag = false;
+                    }
+                }
+            });
 
-                            String roomID = client.settingData.getTopic();
-                            String user = client.settingData.getUserName();
-                            System.out.println(viewModel.getUserList().toString());
-                            client.publish(roomID+"/logout", user);
-                            ArrayList<String> userList = viewModel.getUserList();
-                            logout();
+            dialog.setNegativeButton("취소", null);
 
-                            /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
-                            databaseLogout(userList, roomID, user);
+            dialog.setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                @SneakyThrows
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    /* 대화 내용 저장 */
+                    if (autoSaveFlag) {
+//                        Log.d("Conversation", "대화 내용 저장");
+                        viewModel.conversationSave(0);
+                    }
 
-                            /* MQTTClient 연결 해제 */
+                    String roomID = client.settingData.getTopic();
+                    String user = client.settingData.getUserName();
+                    System.out.println(viewModel.getUserList().toString());
+                    client.publish(roomID+"/logout", user);
+                    ArrayList<String> userList = viewModel.getUserList();
+                    logout();
 
-                            client.getParticipantsList().clear();
-                            client.getConnectOptions().setAutomaticReconnect(false);
+                    /* firebase 참여자목록 삭제, mqtt 삭제 초기화*/
+                    databaseLogout(userList, roomID, user);
 
-                            /* view모델 초기화 */
-                            //MQTTSettingData 초기화
-                            viewModel.initMQTTSettingData();
-                            //mainViewmodel 초기화
-                            viewModel.mainViewMoedlInit();
-                            observeTextFlag = false;
-                            Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                    /* MQTTClient 연결 해제 */
 
+                    client.getParticipantsList().clear();
+                    client.getConnectOptions().setAutomaticReconnect(false);
 
-                        }
-                    })
-                    .show();
+                    /* view모델 초기화 */
+                    //MQTTSettingData 초기화
+                    viewModel.initMQTTSettingData();
+                    //mainViewmodel 초기화
+                    viewModel.mainViewMoedlInit();
+                    observeTextFlag = false;
+                    Navigation.findNavController(binding.getRoot()).navigate(R.id.action_chatRoomFragment_to_homeFragment);
+                }
+            });
+
+            dialog.create().show();
         });
 
         /* -------------------------------------    observe 함수        ---------------------------------------------------------------------------------*/

@@ -208,12 +208,10 @@ public class MQTTClient implements MqttCallbackExtended {
             setParticipantsList(newUser);
 
             //textList 보내기
-            System.out.println("good1");
             //방장일 때 보낸다.
             if(mainViewModel.getMakeRoomUser().equals(userName)){
                 System.out.println(mainViewModel.getMakeRoomUser());
                 System.out.println(userName);
-                System.out.println("good2");
                 ArrayList<MessageItem> textList = mainViewModel.getTestList();
                 for(int i = 0; i < textList.size(); i++){
                     publish(getTopic_text(), textList.get(i).getName() + "&" +textList.get(i).getContent()+ "&" +textList.get(i).getImg() + "&" +textList.get(i).getTime()+ "&" +textList.get(i).getViewType()+ "&" +name);
@@ -334,6 +332,9 @@ public class MQTTClient implements MqttCallbackExtended {
 
                     mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.LEFT_CONTENT));
                 }
+                if(mainViewModel.autoSaveFlag) {
+                    mainViewModel.conversationSave(1);
+                }
             }
             else if(getName.equals("all")){
                 if (Integer.parseInt(sendType) == Code.ViewType.CENTER_CONTENT) {
@@ -345,6 +346,9 @@ public class MQTTClient implements MqttCallbackExtended {
                 } else {
 
                     mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.LEFT_CONTENT));
+                }
+                if(mainViewModel.autoSaveFlag) {
+                    mainViewModel.conversationSave(1);
                 }
             }
 
