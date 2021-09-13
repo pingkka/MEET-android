@@ -12,6 +12,8 @@ import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -156,7 +158,10 @@ public class SttThread extends Thread {
     }
 
     private void publishTextDataAndEmotionData(String text, String emotion) {
-        mqttClient.publish(mqttClient.getTopic_text(), mqttClient.getUserName() + "&" +text+ "&" +emotion);
+        SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+        Date time = new Date();
+        String timeString = format.format(time);
+        mqttClient.publish(mqttClient.getTopic_text(), mqttClient.getUserName() + "&" +text+ "&" +emotion + "&" +timeString+ "&" + "100" + "&" + "all");
     }
 
 }

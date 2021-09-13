@@ -3,9 +3,12 @@ package com.example.LastCapston.main;
 
 import android.util.Log;
 
+import com.example.LastCapston.adapter.ChatMessageAdapter;
 import com.example.LastCapston.calling.CallingViewModel;
 import com.example.LastCapston.calling.PlayThread;
+import com.example.LastCapston.data.Code;
 import com.example.LastCapston.data.MQTTSettingData;
+import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
 import com.example.LastCapston.data.UserSpeakState;
@@ -18,8 +21,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import lombok.Getter;
@@ -57,7 +62,6 @@ public class MQTTClient implements MqttCallbackExtended {
     private String topic_text;
     private String topic_emotion;
     private String topic_speakMark;
-
 
     public ArrayList<String> participantsList = new ArrayList<>(100);
     public ArrayList<String> playThreadUserList = new ArrayList<>(100);
@@ -203,8 +207,29 @@ public class MQTTClient implements MqttCallbackExtended {
             UserItem newUser = new UserItem(name);
             setParticipantsList(newUser);
 
-            //로그인 topic을 받으면 저장
-            mainViewModel.setLoginUser(name);
+            //textList 보내기
+            System.out.println("good1");
+            //방장일 때 보낸다.
+            if(mainViewModel.getMakeRoomUser().equals(userName)){
+                System.out.println(mainViewModel.getMakeRoomUser());
+                System.out.println(userName);
+                System.out.println("good2");
+                ArrayList<MessageItem> textList = mainViewModel.getTestList();
+                for(int i = 0; i < textList.size(); i++){
+                    publish(getTopic_text(), textList.get(i).getName() + "&" +textList.get(i).getContent()+ "&" +textList.get(i).getImg() + "&" +textList.get(i).getTime()+ "&" +textList.get(i).getViewType()+ "&" +name);
+                }
+                //로그인 topic을 받으면 저장
+                SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+                Date time = new Date();
+                String timeString = format.format(time);
+                //mainViewModel.textList.add(new MessageItem(name + "님이 입장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+                //mainViewModel.addMessageItem(new MessageItem(name + "님이 입장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+                publish(getTopic_text(), name + "&" +name + "님이 입장했습니다."+ "&" +""+ "&" +timeString+ "&" + Code.ViewType.CENTER_CONTENT+ "&" +"all");
+            }
+
+
+
+            //mainViewModel.setLoginUser(name);
 
         }
 
@@ -224,6 +249,7 @@ public class MQTTClient implements MqttCallbackExtended {
             playThreadUserList.add(name);
 
             publish(topic_notifyUSer, userName);
+
         }
 
         /* /roomID/notifyUser */
@@ -242,6 +268,12 @@ public class MQTTClient implements MqttCallbackExtended {
                 playThreadList.add(playThread);
                 Log.i("MQTT", "another_playThreadList add " + name); // 나오지 않음
                 playThreadUserList.add(name);
+
+
+
+
+
+
             }
 
         }
@@ -277,15 +309,46 @@ public class MQTTClient implements MqttCallbackExtended {
             String sendTextUser = textArray[0];
             String sendtext = textArray[1];
             String sendImage = textArray[2];
+            String sendTime = textArray[3];
+            String sendType = textArray[4];
+            String getName = textArray[5];
 
             Log.i("MQTT", "text = " + text);
             Log.i("MQTT", "sendTextUser = " + sendTextUser);
             Log.i("MQTT", "sendtext = " + sendtext);
             Log.i("MQTT", "sendtext = " + sendImage);
+            Log.i("MQTT", "sendTime = " + sendTime);
+            Log.i("MQTT", "sendType = " + sendType);
+            Log.i("MQTT", "getName = " + getName);
             SendText sendText = new SendText(sendTextUser, sendtext, sendImage);
-            mainViewModel.setCurrentText(sendText);
 
+            //
+            if(getName.equals(userName)) {
+                if (Integer.parseInt(sendType) == Code.ViewType.CENTER_CONTENT) {
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.CENTER_CONTENT));
+                } else if (getUserName().equals(sendTextUser)) {
 
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
+
+                } else {
+
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.LEFT_CONTENT));
+                }
+            }
+            else if(getName.equals("all")){
+                if (Integer.parseInt(sendType) == Code.ViewType.CENTER_CONTENT) {
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.CENTER_CONTENT));
+                } else if (getUserName().equals(sendTextUser)) {
+
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, null, sendImage, sendTime, Code.ViewType.RIGHT_CONTENT));
+
+                } else {
+
+                    mainViewModel.addMessageItem(new MessageItem(sendtext, sendTextUser, sendImage, sendTime, Code.ViewType.LEFT_CONTENT));
+                }
+            }
+
+            //mainViewModel.setCurrentText(sendText);
         }
 
         /* roomID/emotion */
@@ -312,7 +375,23 @@ public class MQTTClient implements MqttCallbackExtended {
             String name = new String(message.getPayload(), "UTF-8");
             Log.i("MQTT", "logout = " + name);
 
-            mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
+            //mainViewModel.setLogoutUser(name);//화면에 퇴장 알리기
+            if(mainViewModel.getMakeRoomUser().equals(userName)){
+                //로그인 topic을 받으면 저장
+                SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+                Date time = new Date();
+                String timeString = format.format(time);
+                //mainViewModel.textList.add(new MessageItem(name + "님이 입장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+                //mainViewModel.addMessageItem(new MessageItem(name + "님이 입장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+                publish(getTopic_text(), name + "&" +name + "님이 퇴장했습니다."+ "&" +""+ "&" +timeString+ "&" + Code.ViewType.CENTER_CONTENT+ "&" +"all");
+//            SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+//            Date time = new Date();
+//            String timeString = format.format(time);
+//            mainViewModel.addMessageItem(new MessageItem(name + "님이 퇴장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+            }
+
+
+
             Log.i("MQTT", "userList remove " + name);
             //참여인원들에게 나갔다고 알리기
             UserItem newUser = new UserItem(name);
@@ -330,6 +409,7 @@ public class MQTTClient implements MqttCallbackExtended {
                         Log.i("MQTT", "after playThreadList remove " + name + "size(" + playThreadList.size() + ")");
                     }
                 }
+
             }
         }
 

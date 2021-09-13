@@ -85,6 +85,7 @@ public class CreateRoomFragment extends Fragment{
                         //viewModel 설정
                         viewModel.setTopic(binding.roomID.getText().toString());
                         viewModel.setName(binding.userID.getText().toString());
+                        viewModel.setMakeRoomUser(binding.userID.getText().toString());
                         viewModel.clickSubmit();//(설정이 완료된 ip, port, topic, name을 setting data에 저장하는 함수)
 
                         //올바르게 입장 하였으면 그에 맞게 mqtt설정
@@ -104,6 +105,7 @@ public class CreateRoomFragment extends Fragment{
         Map<String, Object> user = new HashMap<>();
         user.put("roomeID", roomID);
         user.put("roomPW", roomPW);
+        user.put("makeRoomUser", participant);
         user.put("participants", Arrays.asList(participant));
         rooms.document(roomID).set(user);
         Toast.makeText(getActivity(), "방을 생성했습니다.", Toast.LENGTH_SHORT).show();

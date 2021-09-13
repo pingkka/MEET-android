@@ -8,7 +8,7 @@ public class MessageItem {
     private String content;
     //이름
     private String name;
-    //이름
+    //감정
     private String img;
     //뷰타입(왼쪽, 가운데, 오른쪽)
     private int viewType;

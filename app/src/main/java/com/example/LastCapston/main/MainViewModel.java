@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.LastCapston.data.MQTTSettingData;
+import com.example.LastCapston.data.MessageItem;
 import com.example.LastCapston.data.SendText;
 import com.example.LastCapston.data.UserItem;
 import com.example.LastCapston.data.UserSpeakState;
@@ -24,18 +25,21 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> port = new MutableLiveData<>();
     private MutableLiveData<String> topic = new MutableLiveData<>();
     private MutableLiveData<String> userName = new MutableLiveData<>();
+    private MutableLiveData<String> makeRoomUser = new MutableLiveData<>();
 
     public MutableLiveData<ArrayList<UserItem>> userListData = new MutableLiveData<ArrayList<UserItem>>();
     public ArrayList<UserItem> userList = new ArrayList<UserItem>();
-    public MutableLiveData<String> loginUser = new MutableLiveData<>();
-    public MutableLiveData<String> logoutUser = new MutableLiveData<>();
-    public MutableLiveData<SendText> currentText = new MutableLiveData<>();
+    public MutableLiveData<ArrayList<MessageItem>> mutableTextList = new MutableLiveData<ArrayList<MessageItem>>();
+    public ArrayList<MessageItem> textList = new ArrayList<MessageItem>();
+//    public MutableLiveData<String> loginUser = new MutableLiveData<>();
+//    public MutableLiveData<String> logoutUser = new MutableLiveData<>();
+//    public MutableLiveData<SendText> currentText = new MutableLiveData<>();
     public MutableLiveData<UserSpeakState> userSpeakState = new MutableLiveData<>();
 
     public MainViewModel() {
         /* 변수 초기화 */
 //        ip.setValue("113.198.82.77"); // BUG
-        ip.setValue("223.194.132.139");
+        ip.setValue("223.194.155.72");
         port.setValue("1883");
         topic.setValue("");
         userName.setValue("");
@@ -64,14 +68,21 @@ public class MainViewModel extends ViewModel {
         /* 변수 초기화 */
         userList = new ArrayList<UserItem>();
         userListData = new MutableLiveData<ArrayList<UserItem>>();
-        currentText = new MutableLiveData<>();
-        loginUser = new MutableLiveData<>();
-        logoutUser = new MutableLiveData<>();
+        mutableTextList = new MutableLiveData<ArrayList<MessageItem>>();
+        textList = new ArrayList<MessageItem>();
+//        currentText = new MutableLiveData<>();
+//        loginUser = new MutableLiveData<>();
+//        logoutUser = new MutableLiveData<>();
     }
 
     public void addUserItem(UserItem user){
         userList.add(user);
         userListData.postValue(userList);
+    }
+
+    public void addMessageItem(MessageItem data){
+        textList.add(data);
+        mutableTextList.postValue(textList);
     }
 
     public void editUserSpeakState(String speakName, String speakState){
@@ -122,24 +133,35 @@ public class MainViewModel extends ViewModel {
         return users;
     }
 
-    public SendText getCurrentText() {
-        return currentText.getValue();
+    public ArrayList<MessageItem> getTestList() {
+        return textList;
     }
 
-    public String getLoginUser() {
-        return loginUser.getValue();
-    }
-
-    public String getLogoutUser() {
-        return logoutUser.getValue();
-    }
+//    public SendText getCurrentText() {
+//        return currentText.getValue();
+//    }
+//
+//    public String getLoginUser() {
+//        return loginUser.getValue();
+//    }
+//
+//    public String getLogoutUser() {
+//        return logoutUser.getValue();
+//    }
 
     public UserSpeakState getUserSpeakState() { return userSpeakState.getValue(); }
 
     /* Setter */
-    public void setLoginUser(String user){
-        loginUser.postValue(user);
-    }
+//    public void setLoginUser(String user){
+//        loginUser.postValue(user);
+//    }
+//    public void setCurrentText(SendText text){
+//        currentText.postValue(text);
+//    }
+//
+//    public void setLogoutUser(String user){
+//        logoutUser.postValue(user);
+//    }
 
     public void setTopic(String topic) {
         this.topic.setValue(topic);
@@ -149,15 +171,17 @@ public class MainViewModel extends ViewModel {
         this.userName.setValue(name);
     }
 
-    public void setCurrentText(SendText text){
-        currentText.postValue(text);
+    public void setMakeRoomUser(String makeRoomUser) {
+        this.makeRoomUser.setValue(makeRoomUser);
+    }
+
+    public String getMakeRoomUser() {
+        return makeRoomUser.getValue();
     }
 
     public void setUserSpeakState(UserSpeakState userSpeakState){
         this.userSpeakState.postValue(userSpeakState);
     }
 
-    public void setLogoutUser(String user){
-        logoutUser.postValue(user);
-    }
+
 }

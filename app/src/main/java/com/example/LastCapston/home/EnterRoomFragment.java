@@ -85,6 +85,7 @@ public class EnterRoomFragment extends Fragment {
                             //viewModel 설정
                             viewModel.setTopic(binding.roomID.getText().toString());
                             viewModel.setName(binding.userID.getText().toString());
+                            viewModel.setMakeRoomUser(document.getData().get("makeRoomUser").toString());
                             viewModel.clickSubmit();
 
                             //mqtt sub

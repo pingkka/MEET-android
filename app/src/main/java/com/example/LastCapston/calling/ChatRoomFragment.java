@@ -171,34 +171,41 @@ public class ChatRoomFragment extends Fragment {
             }
         });
 
-        viewModel.loginUser.observe(getViewLifecycleOwner(), new Observer<String>() {
+        viewModel.mutableTextList.observe(getViewLifecycleOwner(), new Observer<ArrayList<MessageItem>>() {
             @Override
-            public void onChanged(String s) {
-                observeTextFlag = true;
-                String user = viewModel.getLoginUser();
-                SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
-                Date time = new Date();
-                String timeString = format.format(time);
-                dataList.add(new MessageItem(user + "님이 입장했습니다.", null,null, timeString, Code.ViewType.CENTER_CONTENT));
-                recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
-                recyvlerv.scrollToPosition(dataList.size()-1);
+            public void onChanged(ArrayList<MessageItem> strings) {
+                textListUpdate();
             }
         });
 
-        viewModel.logoutUser.observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(observeTextFlag) {
-                    String user = viewModel.getLogoutUser();
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    Date time = new Date();
-                    String timeString = format.format(time);
-                    dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
-                    recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
-                    recyvlerv.scrollToPosition(dataList.size() - 1);
-                }
-            }
-        });
+//        viewModel.loginUser.observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(String s) {
+//                observeTextFlag = true;
+//                String user = viewModel.getLoginUser();
+//                SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm");
+//                Date time = new Date();
+//                String timeString = format.format(time);
+//                dataList.add(new MessageItem(user + "님이 입장했습니다.", null,null, timeString, Code.ViewType.CENTER_CONTENT));
+//                recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
+//                recyvlerv.scrollToPosition(dataList.size()-1);
+//            }
+//        });
+
+//        viewModel.logoutUser.observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(String s) {
+//                if(observeTextFlag) {
+//                    String user = viewModel.getLogoutUser();
+//                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//                    Date time = new Date();
+//                    String timeString = format.format(time);
+//                    dataList.add(new MessageItem(user + "님이 퇴장했습니다.", null, null, timeString, Code.ViewType.CENTER_CONTENT));
+//                    recyvlerv.setAdapter(new ChatMessageAdapter(dataList));
+//                    recyvlerv.scrollToPosition(dataList.size() - 1);
+//                }
+//            }
+//        });
 
         viewModel.userSpeakState.observe(getViewLifecycleOwner(), new Observer<UserSpeakState>() {
             @Override
@@ -209,18 +216,18 @@ public class ChatRoomFragment extends Fragment {
             }
         });
 
-        viewModel.currentText.observe(getViewLifecycleOwner(), new Observer<SendText>() {
-            @Override
-            public void onChanged(SendText sendText) {
-                if(observeTextFlag){
-                    String sendUser =  sendText.sendUser;
-                    String text = sendText.sendText;
-                    String image = sendText.sendImage;
-                    addText(sendUser, text, image);
-                    updateUserListEmotion(sendUser, image);
-                }
-            }
-        });
+//        viewModel.currentText.observe(getViewLifecycleOwner(), new Observer<SendText>() {
+//            @Override
+//            public void onChanged(SendText sendText) {
+//                if(observeTextFlag){
+//                    String sendUser =  sendText.sendUser;
+//                    String text = sendText.sendText;
+//                    String image = sendText.sendImage;
+//                    addText(sendUser, text, image);
+//                    updateUserListEmotion(sendUser, image);
+//                }
+//            }
+//        });
         return binding.getRoot();
     }
 
@@ -253,6 +260,11 @@ public class ChatRoomFragment extends Fragment {
 
         UserListDecoration decoration = new UserListDecoration();
         listView.addItemDecoration(decoration);
+    }
+
+    private void textListUpdate(){
+        recyvlerv.setAdapter(new ChatMessageAdapter(viewModel.getTestList()));
+        recyvlerv.scrollToPosition(viewModel.getTestList().size()-1);
     }
 
     //채팅창 recyclerView 생성 함수
